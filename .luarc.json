@@ -20,17 +20,24 @@
       "Timer",
       "TcpSocket",
       "UdpSocket",
+      "HttpClient",
       "System",
       "Notifications",
       "Component",
       "Design",
       "os"
+    ],
+    "disable": [
+      "assign-type-mismatch",
+      "duplicate-set-local",
+      "inject-field"
     ]
   },
   "workspace": {
     "ignoreDir": [
       "BasicPluginFramework",
-      "plugincompile"
+      "plugincompile",
+      "*.qplug"
     ]
   }
 }

@@ -140,10 +140,10 @@ try {
     # Remove any existing task
     Unregister-ScheduledTask -TaskName $TASK_NAME -Confirm:$false -ErrorAction SilentlyContinue
 
-    $psExe = "powershell.exe"
-    $args  = "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$WORK_DIR\$SERVER_SCRIPT`""
+    $psExe    = "powershell.exe"
+    $taskArgs = "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$WORK_DIR\$SERVER_SCRIPT`""
 
-    $action    = New-ScheduledTaskAction -Execute $psExe -Argument $args
+    $action    = New-ScheduledTaskAction -Execute $psExe -Argument $taskArgs
     $trigger   = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
     $settings  = New-ScheduledTaskSettingsSet `
                     -AllowStartIfOnBatteries `

@@ -4,6 +4,11 @@
     "*.json": "jsonc",
     "*.qplug": "lua"
   },
+  "Lua.workspace.ignoreDir": [
+    "BasicPluginFramework",
+    "plugincompile",
+    "*.qplug"
+  ],
   "files.autoSave": "off",
   "files.autoSaveDelay": 500,
   "editor.tabSize": 2

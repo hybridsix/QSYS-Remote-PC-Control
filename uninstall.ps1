@@ -39,9 +39,8 @@ Write-Host "================================================" -ForegroundColor W
 # Read port from config if present (overrides param default)
 $configFile = "$WORK_DIR\config.txt"
 if (Test-Path $configFile) {
-    Get-Content $configFile | ForEach-Object {
-        if ($_ -match "^PORT=(\d+)$") { $Port = [int]$matches[1] }
-    }
+    $portLine = Get-Content $configFile | Where-Object { $_ -match "^PORT=\d+$" } | Select-Object -First 1
+    if ($portLine -match "^PORT=(\d+)$") { $Port = [int]$Matches[1] }
 }
 Write-Host "  Port: $Port"
 Write-Host ""
