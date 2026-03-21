@@ -1,1 +1,11 @@
--- No internal Q-SYS components used by this plugin
+-- =============================================================
+-- components.lua -- Win PC Control
+--
+-- Declares any internal Q-SYS DSP components used by the plugin
+-- (e.g. mixers, delays, routers). This plugin performs no DSP
+-- processing inside the Core -- all audio manipulation happens
+-- on the Windows PC via the Core Audio API. Therefore no
+-- internal components are needed here.
+-- =============================================================
+
+-- No internal Q-SYS components used by this plugin.

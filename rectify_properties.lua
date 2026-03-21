@@ -1,5 +1,18 @@
--- Hide Debug Print when set to None to reduce clutter in the Properties panel.
--- Remove this block if you want Debug Print always visible.
+-- =============================================================
+-- rectify_properties.lua -- Win PC Control
+--
+-- Called by Q-SYS Designer after loading properties, allowing
+-- us to show/hide or modify properties dynamically based on
+-- current values. This runs at design time, not on the Core.
+--
+-- Current behavior:
+--   Hide the Debug Print property when it is set to "None",
+--   since a hidden "None" is functionally the same as a visible
+--   "None" but reduces clutter in the Properties panel for
+--   operators who don't need to see it. It reappears as soon as
+--   someone sets it to Tx/Rx or All via the Properties panel.
+-- =============================================================
+
 if props["Debug Print"].Value == "None" then
   props["Debug Print"].IsHidden = true
 else
