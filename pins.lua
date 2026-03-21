@@ -1,0 +1,1 @@
+-- No non-control pins required for this plugin

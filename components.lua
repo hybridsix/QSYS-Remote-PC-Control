@@ -1,0 +1,1 @@
+-- No internal Q-SYS components used by this plugin
