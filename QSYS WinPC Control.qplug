@@ -5,14 +5,14 @@
 PluginInfo = {
   Name        = "QSYS WinPC Control~PC",
   Version     = "0.1",
-  BuildVersion= "0.1.0.0",
+  BuildVersion= "0.1.0.1",
   Id          = "dd941513-d452-416e-95eb-b47d08457b36",
   Author      = "Michael King",
   Description = "Remote control a Windows PC from Q-SYS: power (WOL), volume/mute (SSH), status polling (TCP/RDP)"
 }
 
 function GetColor(props)
-  return { 30, 90, 160 }
+  return { 21, 163, 213 }  -- Clair Global "Patch of Blue" #15a3d5
 end
 
 function GetPrettyName(props)
@@ -237,7 +237,7 @@ function GetControlLayout(props)
     table.insert(graphics, {
       Type        = "GroupBox",
       Text        = "",
-      Fill        = { 220, 220, 220 },
+      Fill        = { 43, 43, 43 },   -- Paint it Black
       StrokeWidth = 0,
       Position    = { 0, 0 },
       Size        = { 400, 228 }
@@ -247,9 +247,9 @@ function GetControlLayout(props)
     table.insert(graphics, {
       Type        = "GroupBox",
       Text        = "Power Control",
-      Fill        = { 200, 215, 235 },
+      Fill        = { 3, 75, 88 },    -- Dazzling Blue
       StrokeWidth = 1,
-      StrokeColor = { 120, 140, 170 },
+      StrokeColor = { 21, 163, 213 }, -- Patch of Blue
       Position    = { 5, 5 },
       Size        = { 390, 52 }
     })
@@ -276,9 +276,9 @@ function GetControlLayout(props)
     table.insert(graphics, {
       Type        = "GroupBox",
       Text        = "Connection Status",
-      Fill        = { 235, 235, 235 },
+      Fill        = { 3, 104, 128 },  -- Blue Suede
       StrokeWidth = 1,
-      StrokeColor = { 150, 150, 150 },
+      StrokeColor = { 21, 163, 213 }, -- Patch of Blue
       Position    = { 5, 65 },
       Size        = { 390, 82 }
     })
@@ -290,7 +290,7 @@ function GetControlLayout(props)
       Size        = { 52, 18 },
       FontSize    = 12,
       HTextAlign  = "Right",
-      Color       = { 50, 50, 50 }
+      Color       = { 207, 204, 204 } -- Silver Springs
     })
   
     layout["OnlineStatus"] = {
@@ -315,7 +315,7 @@ function GetControlLayout(props)
       Size       = { 72, 16 },
       FontSize   = 11,
       HTextAlign = "Right",
-      Color      = { 80, 80, 80 }
+      Color      = { 207, 204, 204 } -- Silver Springs
     })
   
     layout["LastPoll"] = {
@@ -330,9 +330,9 @@ function GetControlLayout(props)
     table.insert(graphics, {
       Type        = "GroupBox",
       Text        = "Audio",
-      Fill        = { 235, 235, 235 },
+      Fill        = { 3, 104, 128 },  -- Blue Suede
       StrokeWidth = 1,
-      StrokeColor = { 150, 150, 150 },
+      StrokeColor = { 21, 163, 213 }, -- Patch of Blue
       Position    = { 5, 155 },
       Size        = { 390, 62 }
     })
@@ -344,7 +344,7 @@ function GetControlLayout(props)
       Size       = { 60, 16 },
       FontSize   = 12,
       HTextAlign = "Right",
-      Color      = { 50, 50, 50 }
+      Color      = { 207, 204, 204 } -- Silver Springs
     })
   
     layout["Volume"] = {
@@ -372,7 +372,7 @@ function GetControlLayout(props)
     table.insert(graphics, {
       Type        = "GroupBox",
       Text        = "",
-      Fill        = { 220, 220, 220 },
+      Fill        = { 43, 43, 43 },   -- Paint it Black
       StrokeWidth = 0,
       Position    = { 0, 0 },
       Size        = { 400, 195 }
@@ -381,9 +381,9 @@ function GetControlLayout(props)
     table.insert(graphics, {
       Type        = "GroupBox",
       Text        = "Connection Configuration",
-      Fill        = { 235, 235, 235 },
+      Fill        = { 3, 104, 128 },  -- Blue Suede
       StrokeWidth = 1,
-      StrokeColor = { 150, 150, 150 },
+      StrokeColor = { 21, 163, 213 }, -- Patch of Blue
       Position    = { 5, 5 },
       Size        = { 390, 180 }
     })
@@ -396,7 +396,7 @@ function GetControlLayout(props)
         Size       = { 110, 16 },
         FontSize   = 11,
         HTextAlign = "Right",
-        Color      = { 80, 80, 80 }
+        Color      = { 207, 204, 204 } -- Silver Springs
       })
     end
   
@@ -408,7 +408,7 @@ function GetControlLayout(props)
         Size       = { 260, 16 },
         FontSize   = 11,
         HTextAlign = "Left",
-        Color      = { 20, 20, 20 }
+        Color      = { 247, 247, 247 } -- White Satin
       })
     end
   
@@ -438,7 +438,7 @@ function GetControlLayout(props)
       Size       = { 375, 14 },
       FontSize   = 9,
       HTextAlign = "Left",
-      Color      = { 110, 110, 110 }
+      Color      = { 105, 104, 104 } -- Grey Seal
     })
   
   end

@@ -5,7 +5,7 @@
 --[[ #include "info.lua" ]]
 
 function GetColor(props)
-  return { 30, 90, 160 }
+  return { 21, 163, 213 }  -- Clair Global "Patch of Blue" #15a3d5
 end
 
 function GetPrettyName(props)

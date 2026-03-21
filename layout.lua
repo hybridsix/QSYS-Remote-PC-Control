@@ -9,7 +9,7 @@ if CurrentPage == "Control" then
   table.insert(graphics, {
     Type        = "GroupBox",
     Text        = "",
-    Fill        = { 220, 220, 220 },
+    Fill        = { 43, 43, 43 },   -- Paint it Black
     StrokeWidth = 0,
     Position    = { 0, 0 },
     Size        = { 400, 228 }
@@ -19,9 +19,9 @@ if CurrentPage == "Control" then
   table.insert(graphics, {
     Type        = "GroupBox",
     Text        = "Power Control",
-    Fill        = { 200, 215, 235 },
+    Fill        = { 3, 75, 88 },    -- Dazzling Blue
     StrokeWidth = 1,
-    StrokeColor = { 120, 140, 170 },
+    StrokeColor = { 21, 163, 213 }, -- Patch of Blue
     Position    = { 5, 5 },
     Size        = { 390, 52 }
   })
@@ -48,9 +48,9 @@ if CurrentPage == "Control" then
   table.insert(graphics, {
     Type        = "GroupBox",
     Text        = "Connection Status",
-    Fill        = { 235, 235, 235 },
+    Fill        = { 3, 104, 128 },  -- Blue Suede
     StrokeWidth = 1,
-    StrokeColor = { 150, 150, 150 },
+    StrokeColor = { 21, 163, 213 }, -- Patch of Blue
     Position    = { 5, 65 },
     Size        = { 390, 82 }
   })
@@ -62,7 +62,7 @@ if CurrentPage == "Control" then
     Size        = { 52, 18 },
     FontSize    = 12,
     HTextAlign  = "Right",
-    Color       = { 50, 50, 50 }
+    Color       = { 207, 204, 204 } -- Silver Springs
   })
 
   layout["OnlineStatus"] = {
@@ -87,7 +87,7 @@ if CurrentPage == "Control" then
     Size       = { 72, 16 },
     FontSize   = 11,
     HTextAlign = "Right",
-    Color      = { 80, 80, 80 }
+    Color      = { 207, 204, 204 } -- Silver Springs
   })
 
   layout["LastPoll"] = {
@@ -102,9 +102,9 @@ if CurrentPage == "Control" then
   table.insert(graphics, {
     Type        = "GroupBox",
     Text        = "Audio",
-    Fill        = { 235, 235, 235 },
+    Fill        = { 3, 104, 128 },  -- Blue Suede
     StrokeWidth = 1,
-    StrokeColor = { 150, 150, 150 },
+    StrokeColor = { 21, 163, 213 }, -- Patch of Blue
     Position    = { 5, 155 },
     Size        = { 390, 62 }
   })
@@ -116,7 +116,7 @@ if CurrentPage == "Control" then
     Size       = { 60, 16 },
     FontSize   = 12,
     HTextAlign = "Right",
-    Color      = { 50, 50, 50 }
+    Color      = { 207, 204, 204 } -- Silver Springs
   })
 
   layout["Volume"] = {
@@ -144,7 +144,7 @@ elseif CurrentPage == "Setup" then
   table.insert(graphics, {
     Type        = "GroupBox",
     Text        = "",
-    Fill        = { 220, 220, 220 },
+    Fill        = { 43, 43, 43 },   -- Paint it Black
     StrokeWidth = 0,
     Position    = { 0, 0 },
     Size        = { 400, 195 }
@@ -153,9 +153,9 @@ elseif CurrentPage == "Setup" then
   table.insert(graphics, {
     Type        = "GroupBox",
     Text        = "Connection Configuration",
-    Fill        = { 235, 235, 235 },
+    Fill        = { 3, 104, 128 },  -- Blue Suede
     StrokeWidth = 1,
-    StrokeColor = { 150, 150, 150 },
+    StrokeColor = { 21, 163, 213 }, -- Patch of Blue
     Position    = { 5, 5 },
     Size        = { 390, 180 }
   })
@@ -168,7 +168,7 @@ elseif CurrentPage == "Setup" then
       Size       = { 110, 16 },
       FontSize   = 11,
       HTextAlign = "Right",
-      Color      = { 80, 80, 80 }
+      Color      = { 207, 204, 204 } -- Silver Springs
     })
   end
 
@@ -180,7 +180,7 @@ elseif CurrentPage == "Setup" then
       Size       = { 260, 16 },
       FontSize   = 11,
       HTextAlign = "Left",
-      Color      = { 20, 20, 20 }
+      Color      = { 247, 247, 247 } -- White Satin
     })
   end
 
@@ -210,7 +210,7 @@ elseif CurrentPage == "Setup" then
     Size       = { 375, 14 },
     FontSize   = 9,
     HTextAlign = "Left",
-    Color      = { 110, 110, 110 }
+    Color      = { 105, 104, 104 } -- Grey Seal
   })
 
 end
