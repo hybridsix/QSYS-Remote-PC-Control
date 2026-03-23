@@ -7,14 +7,14 @@
 -- design time -- only GetControlLayout(), GetProperties(), etc.
 -- in plugin.lua run at design time.
 --
--- Transport: HTTP via QSYSControlServer.ps1 on the Windows PC.
+-- Transport: HTTP via WinPCControlServer.ps1 on the Windows PC.
 -- The server listens on a configurable port (default 2207) and
 -- accepts GET /status and POST /command requests, protected by
--- a Bearer token stored in C:\QSYSControl\config.txt on the PC.
+-- a Bearer token stored in C:\QSYS WinPC Control\config.txt on the PC.
 --
 -- Power on uses Wake-on-LAN (UDP magic packet, port 9).
 -- Volume and mute use the Windows Core Audio API via inline C#
--- inside QSYSControlServer.ps1.
+-- inside WinPCControlServer.ps1.
 -- =============================================================
 
 
@@ -247,7 +247,7 @@ end
 --
 -- These functions translate button presses and control changes
 -- into HTTP POST commands to the Windows server.
--- Command strings must match what QSYSControlServer.ps1 expects.
+-- Command strings must match what WinPCControlServer.ps1 expects.
 -- =============================================================
 
 -- Tell the PC to shut down. If the server confirms with 200, we move

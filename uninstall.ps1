@@ -1,6 +1,6 @@
 # ============================================================
 # uninstall.ps1
-# Removes all QSYSControl components from this PC.
+# Removes all WinPC Control components from this PC.
 #
 # MUST be run as Administrator.
 #
@@ -8,7 +8,7 @@
 #   - Scheduled Task
 #   - Windows Firewall rule
 #   - HTTP URL ACL reservation
-#   - C:\QSYSControl\ folder and all contents
+#   - C:\QSYS WinPC Control\ folder and all contents
 #
 # Version: 0.1
 # ============================================================
@@ -19,8 +19,8 @@ param(
     [int]$Port = 2207
 )
 
-$WORK_DIR  = "C:\QSYSControl"
-$TASK_NAME = "QSYSControl Server"
+$WORK_DIR  = "C:\QSYS WinPC Control"
+$TASK_NAME = "WinPC Control Server"
 
 function Write-Step ([string]$msg) {
     Write-Host ""
@@ -33,7 +33,7 @@ function Write-OK ([string]$msg) {
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor White
-Write-Host "  QSYSControl  —  Uninstall" -ForegroundColor White
+Write-Host "  WinPC Control  —  Uninstall" -ForegroundColor White
 Write-Host "================================================" -ForegroundColor White
 
 # Read port from config if present (overrides param default)
@@ -59,9 +59,9 @@ catch {
 
 
 # ---- Remove Firewall rule ----
-Write-Step "Removing Firewall rule 'QSYSControl HTTP'"
+Write-Step "Removing Firewall rule 'WinPC Control HTTP'"
 try {
-    Remove-NetFirewallRule -DisplayName "QSYSControl HTTP" -ErrorAction SilentlyContinue
+    Remove-NetFirewallRule -DisplayName "WinPC Control HTTP" -ErrorAction SilentlyContinue
     Write-OK "Firewall rule removed"
 }
 catch {

@@ -1,12 +1,12 @@
 # ============================================================
 # install.ps1
-# One-time setup for QSYSControl on a Windows 11 PC
+# One-time setup for WinPC Control on a Windows 11 PC
 #
 # MUST be run as Administrator.
 # Run once per machine, once per user account that needs control.
 #
 # What this script does:
-#   1. Creates C:\QSYSControl\
+#   1. Creates C:\QSYS WinPC Control\
 #   2. Copies server script there
 #   3. Generates a secure auth token and saves to config.txt
 #   4. Registers Windows HTTP URL ACL (allows non-admin to bind port)
@@ -23,11 +23,11 @@ param(
     [int]$Port = 2207
 )
 
-$WORK_DIR      = "C:\QSYSControl"
-$SERVER_SCRIPT = "QSYSControlServer.ps1"
+$WORK_DIR      = "C:\QSYS WinPC Control"
+$SERVER_SCRIPT = "WinPCControlServer.ps1"
 $CONFIG_FILE   = "$WORK_DIR\config.txt"
 $LOG_FILE      = "$WORK_DIR\install.log"
-$TASK_NAME     = "QSYSControl Server"
+$TASK_NAME     = "WinPC Control Server"
 
 function Write-Step ([string]$msg) {
     Write-Host ""
@@ -45,7 +45,7 @@ function Write-Fail ([string]$msg) {
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor White
-Write-Host "  QSYSControl  —  Windows Setup" -ForegroundColor White
+Write-Host "  WinPC Control  —  Windows Setup" -ForegroundColor White
 Write-Host "================================================" -ForegroundColor White
 Write-Host "  Port:  $Port"
 Write-Host "  User:  $env:USERNAME"
@@ -116,16 +116,16 @@ catch {
 Write-Step "Adding Windows Firewall inbound rule (TCP port $Port)"
 try {
     # Remove existing rule with same name first
-    Remove-NetFirewallRule -DisplayName "QSYSControl HTTP" -ErrorAction SilentlyContinue
+    Remove-NetFirewallRule -DisplayName "WinPC Control HTTP" -ErrorAction SilentlyContinue
 
     New-NetFirewallRule `
-        -DisplayName "QSYSControl HTTP" `
+        -DisplayName "WinPC Control HTTP" `
         -Direction   Inbound `
         -Protocol    TCP `
         -LocalPort   $Port `
         -Action      Allow `
         -Profile     Any `
-        -Description "Allows Q-SYS plugin to reach QSYSControlServer on port $Port" | Out-Null
+        -Description "Allows Q-SYS plugin to reach WinPCControlServer on port $Port" | Out-Null
 
     Write-OK "Firewall rule added (TCP $Port inbound, all profiles)"
 }
@@ -177,7 +177,7 @@ Add-Content -Path $LOG_FILE -Value $installRecord
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Green
-Write-Host "  Installation complete!" -ForegroundColor Green
+Write-Host "  WinPC Control — Installation complete!" -ForegroundColor Green
 Write-Host "================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Copy this token into the Q-SYS plugin properties:" -ForegroundColor Yellow

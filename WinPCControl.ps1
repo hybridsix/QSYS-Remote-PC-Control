@@ -1,5 +1,5 @@
 # ============================================================
-# QSYSControl.ps1
+# WinPCControl.ps1
 # Windows-side audio and power control script for Q-SYS integration
 #
 # Triggered by:  Windows Scheduled Task watching Event ID 9001
@@ -23,9 +23,9 @@
 # CONFIGURATION
 # ============================================================
 
-$STATUS_FILE  = "C:\QSYSControl\status.txt"
-$LOG_FILE     = "C:\QSYSControl\qsyscontrol.log"
-$EVENT_SOURCE = "QSYSControl"
+$STATUS_FILE  = "C:\QSYS WinPC Control\status.txt"
+$LOG_FILE     = "C:\QSYS WinPC Control\winpccontrol.log"
+$EVENT_SOURCE = "WinPCControl"
 $EVENT_LOG    = "Application"
 $EVENT_ID_IN  = 9001          # Q-SYS sends commands on this Event ID
 $EVENT_ID_OUT = 9002          # Reserved for future event-based status reporting
@@ -340,10 +340,10 @@ function Invoke-QSYSCommand {
 # Entry point when the Scheduled Task fires
 # ============================================================
 
-Write-Log "=== QSYSControl triggered ==="
+Write-Log "=== WinPCControl triggered ==="
 
 # Ensure working directory exists
-$workDir = "C:\QSYSControl"
+$workDir = "C:\QSYS WinPC Control"
 if (-not (Test-Path $workDir)) {
     try {
         New-Item -ItemType Directory -Path $workDir -Force | Out-Null
@@ -363,4 +363,4 @@ Invoke-QSYSCommand -RawMessage $rawCommand
 # This keeps Q-SYS feedback current regardless of what was requested
 Update-StatusFile
 
-Write-Log "=== QSYSControl complete ==="
+Write-Log "=== WinPCControl complete ==="

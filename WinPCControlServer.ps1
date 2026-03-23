@@ -1,5 +1,5 @@
 # ============================================================
-# QSYSControlServer.ps1
+# WinPCControlServer.ps1
 # Persistent HTTP control server for Q-SYS WinPC Control plugin
 #
 # Must run in the INTERACTIVE USER SESSION for audio API access.
@@ -10,11 +10,11 @@
 #   GET  /status    Returns current volume, mute state, timestamp
 #   POST /command   Accepts VOLUME:N  MUTE:0  MUTE:1  SHUTDOWN
 #
-# Config read from: C:\QSYSControl\config.txt
+# Config read from: C:\QSYS WinPC Control\config.txt
 #   PORT=2207
 #   TOKEN=<base64 token>
 #
-# Logs written to: C:\QSYSControl\server.log
+# Logs written to: C:\QSYS WinPC Control\server.log
 #
 # Version: 0.1
 # ============================================================
@@ -24,7 +24,7 @@
 # CONFIGURATION
 # ============================================================
 
-$WORK_DIR   = "C:\QSYSControl"
+$WORK_DIR   = "C:\QSYS WinPC Control"
 $CONFIG_FILE = "$WORK_DIR\config.txt"
 $LOG_FILE    = "$WORK_DIR\server.log"
 
@@ -52,17 +52,33 @@ if ($Token -eq "") {
 
 # ============================================================
 # LOGGING
+# Max log size is capped at $LOG_MAX_LINES lines.
+# The file is trimmed on startup and every 100 log writes.
 # ============================================================
+
+$LOG_MAX_LINES       = 500
+$script:_logWriteCount = 0
 
 function Write-Log {
     param([string]$Message)
     $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     Add-Content -Path $LOG_FILE -Value "[$ts] $Message"
+    $script:_logWriteCount++
+    if ($script:_logWriteCount % 100 -eq 0) { Trim-Log }
+}
+
+function Trim-Log {
+    if (-not (Test-Path $LOG_FILE)) { return }
+    $lines = Get-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
+    if ($lines.Count -gt $LOG_MAX_LINES) {
+        $trimmed = $lines | Select-Object -Last $LOG_MAX_LINES
+        Set-Content -Path $LOG_FILE -Value $trimmed
+    }
 }
 
 
 # ============================================================
-# WINDOWS CORE AUDIO API  (inline — no dependency on QSYSControl.ps1)
+# WINDOWS CORE AUDIO API  (inline — no dependency on WinPCControl.ps1)
 # ============================================================
 
 Add-Type -TypeDefinition @"
@@ -169,7 +185,7 @@ function Set-MasterMute ([bool]$Muted) {
 
 
 # ============================================================
-# COMMAND ROUTER  (same logic as QSYSControl.ps1)
+# COMMAND ROUTER  (same logic as WinPCControl.ps1)
 # ============================================================
 
 function Invoke-QSYSCommand {
@@ -270,7 +286,8 @@ $listener.Prefixes.Add("http://+:$Port/")
 
 try {
     $listener.Start()
-    Write-Log "=== QSYSControlServer started on port $Port ==="
+    Write-Log "=== WinPCControlServer started on port $Port ==="
+    Trim-Log   # Trim any leftover growth from previous run
 }
 catch {
     Write-Log "FATAL: Could not start HTTP listener on port $Port. Was install.ps1 run as admin? Error: $_"
@@ -328,4 +345,4 @@ while ($listener.IsListening) {
     }
 }
 
-Write-Log "=== QSYSControlServer stopped ==="
+Write-Log "=== WinPCControlServer stopped ==="
