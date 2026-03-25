@@ -100,8 +100,12 @@ interface IAudioEndpointVolume {
     int RegisterControlChangeNotify(IntPtr pNotify);
     int UnregisterControlChangeNotify(IntPtr pNotify);
     int GetChannelCount(out uint pnChannelCount);
+    int SetMasterVolumeLevel(float fLevelDB, ref Guid pguidEventContext);
+    int GetMasterVolumeLevel(out float pfLevelDB);
     int SetMasterVolumeLevelScalar(float fLevel, ref Guid pguidEventContext);
     int GetMasterVolumeLevelScalar(out float pfLevel);
+    int SetChannelVolumeLevel(uint nChannel, float fLevelDB, ref Guid pguidEventContext);
+    int GetChannelVolumeLevel(uint nChannel, out float pfLevelDB);
     int SetChannelVolumeLevelScalar(uint nChannel, float fLevel, ref Guid pguidEventContext);
     int GetChannelVolumeLevelScalar(uint nChannel, out float pfLevel);
     int SetMute([MarshalAs(UnmanagedType.Bool)] bool bMute, ref Guid pguidEventContext);
