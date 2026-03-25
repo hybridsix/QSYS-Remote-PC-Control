@@ -138,7 +138,7 @@ try {
     Unregister-ScheduledTask -TaskName $TASK_NAME -Confirm:$false -ErrorAction SilentlyContinue
 
     $psExe    = "powershell.exe"
-    $taskArgs = "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$WORK_DIR\$SERVER_SCRIPT`""
+    $taskArgs = "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$WORK_DIR\$SERVER_SCRIPT`""
 
     $action    = New-ScheduledTaskAction -Execute $psExe -Argument $taskArgs
     $trigger   = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME

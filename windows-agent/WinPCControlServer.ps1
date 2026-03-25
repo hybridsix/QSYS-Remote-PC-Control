@@ -166,7 +166,10 @@ function Get-MasterVolume {
 
 function Get-MasterMute {
     try   { return [AudioHelper]::GetMute() }
-    catch { Write-Log "ERROR reading mute: $_"; return $false }
+    catch {
+        Write-Log "ERROR reading mute: $_"
+        return $false
+    }
 }
 
 function Set-MasterVolume ([int]$Percent) {
@@ -278,6 +281,22 @@ if (-not (Test-Path $WORK_DIR)) {
     New-Item -ItemType Directory -Path $WORK_DIR -Force | Out-Null
 }
 
+# Wait for the Windows audio subsystem to be ready (can take a few seconds at logon)
+$audioReady = $false
+for ($i = 0; $i -lt 15; $i++) {
+    try {
+        $null = [AudioHelper]::GetVolume()
+        $audioReady = $true
+        break
+    }
+    catch {
+        Start-Sleep -Seconds 2
+    }
+}
+if (-not $audioReady) {
+    Write-Log "WARNING: Audio subsystem not ready after 30 seconds - volume/mute may not work"
+}
+
 $listener = [System.Net.HttpListener]::new()
 $listener.Prefixes.Add("http://+:$Port/")
 
@@ -317,7 +336,7 @@ while ($listener.IsListening) {
             $body = Get-StatusBody
             Send-Response -Response $response -Body $body
         }
-        elseif ($path -eq "/command" -and $method -eq "POST") {
+        elseif ($path -eq "/command" -and ($method -eq "POST" -or $method -eq "GET")) {
             $reader  = [System.IO.StreamReader]::new($request.InputStream, [System.Text.Encoding]::UTF8)
             $cmdBody = $reader.ReadToEnd().Trim()
             $reader.Dispose()
