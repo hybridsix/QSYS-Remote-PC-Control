@@ -345,6 +345,13 @@ while ($listener.IsListening) {
             $cmdBody = $reader.ReadToEnd().Trim()
             $reader.Dispose()
 
+            # Fall back to ?cmd= query string (Q-SYS emulate mode sends GET with no body)
+            if ($cmdBody -eq "") {
+                $cmdBody = [System.Uri]::UnescapeDataString(
+                    ($request.QueryString["cmd"] -replace '\+', ' ')
+                ).Trim()
+            }
+
             if ($cmdBody -ne "") {
                 # Send OK before SHUTDOWN so Q-SYS gets the response
                 Send-Response -Response $response -Body "OK"

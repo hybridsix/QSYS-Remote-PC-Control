@@ -44,6 +44,11 @@ local cachedMac = (macProperty ~= "") and macProperty or nil
 -- so we can restore it when the user unmutes.
 local premuteVolume = nil
 
+-- syncedFromPc is false until the first successful poll sets the fader
+-- from the PC's actual volume. While false, Volume/Mute event handlers
+-- do not send commands, preventing startup from overwriting Windows volume.
+local syncedFromPc = false
+
 
 -- -------------------------------------------------------------
 -- State machine
@@ -81,6 +86,7 @@ local function SetState(newState)
     -- OFFLINE -- also reset audio controls so they don't show stale values.
     Controls.OnlineStatus.Boolean = false
     Controls.StatusText.String    = "Offline"
+    syncedFromPc = false           -- require re-sync before next commands fire
     Controls.Volume.Value         = 0
     Controls.Mute.Boolean         = false
   end
@@ -114,8 +120,14 @@ local function http_post(cmd, callback)
 
   dbg("Tx", "POST /command  body: " .. cmd)
 
+  -- Append cmd as a query-string param so Q-SYS emulate mode (which
+  -- downgrades POST to GET and drops the body) still carries the payload.
+  local encodedCmd = cmd:gsub("([^%w%-%.%_%~ ])", function(c)
+    return string.format("%%%02X", string.byte(c))
+  end):gsub(" ", "+")
+
   HttpClient.Download {
-    Url     = baseUrl .. "/command",
+    Url     = baseUrl .. "/command?cmd=" .. encodedCmd,
     Headers = {
       Authorization    = "Bearer " .. authToken,
       ["Content-Type"] = "text/plain"
@@ -317,6 +329,10 @@ local function DoPoll()
       Controls.LastPoll.String = os.date("%Y-%m-%d %H:%M:%S")
       dbg("Rx", "Vol=" .. (status.VOLUME or "?") .. "  Mute=" .. (status.MUTE or "?"))
 
+      -- Allow Volume/Mute handlers to send commands now that we have
+      -- synced the fader from the PC's actual state.
+      syncedFromPc = true
+
     else
       -- No HTTP 200 -- the PC is not responding.
       if State == "BOOTING" then
@@ -380,6 +396,7 @@ Controls.Volume.EventHandler = function()
   if Controls.Volume.Value ~= clamped then
     Controls.Volume.Value = clamped  -- snap fader back; this re-fires the handler but clamped==value so no loop
   end
+  if not syncedFromPc then return end  -- don't overwrite PC volume before first poll
   if not RequireOnline("Volume") then return end
   SendVolume(clamped)
 end
@@ -387,6 +404,7 @@ end
 -- Mute: Syncs the toggle button to Windows master mute.
 -- When muting, saves the current volume so it can be restored on unmute.
 Controls.Mute.EventHandler = function()
+  if not syncedFromPc then return end  -- don't overwrite PC mute before first poll
   if not RequireOnline("Mute") then return end
   local muting = Controls.Mute.Boolean
   if muting then
