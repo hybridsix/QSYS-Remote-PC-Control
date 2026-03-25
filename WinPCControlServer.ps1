@@ -259,12 +259,13 @@ function Get-MacAddress {
 }
 
 function Get-StatusBody {
-    $vol     = Get-MasterVolume
-    $muted   = Get-MasterMute
-    $muteInt = if ($muted) { "1" } else { "0" }
-    $ts      = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $mac     = Get-MacAddress
-    return "VOLUME:$vol`r`nMUTE:$muteInt`r`nMAC:$mac`r`nUPDATED:$ts`r`n"
+    $vol      = Get-MasterVolume
+    $muted    = Get-MasterMute
+    $muteInt  = if ($muted) { "1" } else { "0" }
+    $ts       = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $mac      = Get-MacAddress
+    $hostname = $env:COMPUTERNAME
+    return "VOLUME:$vol`r`nMUTE:$muteInt`r`nMAC:$mac`r`nHOSTNAME:$hostname`r`nUPDATED:$ts`r`n"
 }
 
 

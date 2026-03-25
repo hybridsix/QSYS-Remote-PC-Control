@@ -13,8 +13,4 @@
 --   someone sets it to Tx/Rx or All via the Properties panel.
 -- =============================================================
 
-if props["Debug Print"].Value == "None" then
-  props["Debug Print"].IsHidden = true
-else
-  props["Debug Print"].IsHidden = false
-end
+-- No dynamic property visibility adjustments required.

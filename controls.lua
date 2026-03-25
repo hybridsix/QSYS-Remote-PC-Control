@@ -7,9 +7,8 @@
 -- =============================================================
 
 
-local showPower  = props["Show Power Pins"].Value
-local showVolume = props["Show Volume Pins"].Value
-local showStatus = props["Show Status Pins"].Value
+-- Pin visibility is controlled by UserPin=true checkboxes in the Properties panel.
+-- PinStyle sets the default state: a real style = checked (visible); "None" = unchecked (hidden).
 
 
 -- -------------------------------------------------------------
@@ -22,7 +21,7 @@ table.insert(ctrls, {
   ControlType = "Button",
   ButtonType  = "Momentary",
   Count       = 1,
-  UserPin     = showPower,
+  UserPin     = true,
   PinStyle    = "Input",
   Icon        = "Power"
 })
@@ -32,7 +31,7 @@ table.insert(ctrls, {
   ControlType = "Button",
   ButtonType  = "Momentary",
   Count       = 1,
-  UserPin     = showPower,
+  UserPin     = true,
   PinStyle    = "Input",
   Icon        = "Power"
 })
@@ -46,7 +45,7 @@ table.insert(ctrls, {
   ControlType   = "Indicator",
   IndicatorType = "LED",
   Count         = 1,
-  UserPin       = showStatus,
+  UserPin       = true,
   PinStyle      = "Output"
 })
 
@@ -55,7 +54,7 @@ table.insert(ctrls, {
   ControlType   = "Indicator",
   IndicatorType = "Text",
   Count         = 1,
-  UserPin       = showStatus,
+  UserPin       = true,
   PinStyle      = "Output"
 })
 
@@ -64,7 +63,7 @@ table.insert(ctrls, {
   ControlType   = "Indicator",
   IndicatorType = "Text",
   Count         = 1,
-  UserPin       = showStatus,
+  UserPin       = true,
   PinStyle      = "Output"
 })
 
@@ -75,12 +74,43 @@ table.insert(ctrls, {
 table.insert(ctrls, {
   Name        = "Volume",
   ControlType = "Knob",
-  ControlUnit = "Percent",
+  ControlUnit = "Integer",
   Min         = 0,
   Max         = 100,
   Count       = 1,
-  UserPin     = showVolume,
+  UserPin     = true,
   PinStyle    = "Both"
+})
+
+table.insert(ctrls, {
+  Name        = "VolumeMin",
+  ControlType = "Knob",
+  ControlUnit = "Integer",
+  Min         = 0,
+  Max         = 100,
+  Count       = 1,
+  UserPin     = false,
+  PinStyle    = "None"
+})
+
+table.insert(ctrls, {
+  Name        = "VolumeMax",
+  ControlType = "Knob",
+  ControlUnit = "Integer",
+  Min         = 0,
+  Max         = 100,
+  Count       = 1,
+  UserPin     = false,
+  PinStyle    = "None"
+})
+
+table.insert(ctrls, {
+  Name          = "VolumeWarning",
+  ControlType   = "Indicator",
+  IndicatorType = "LED",
+  Count         = 1,
+  UserPin       = false,
+  PinStyle      = "None"
 })
 
 table.insert(ctrls, {
@@ -88,6 +118,21 @@ table.insert(ctrls, {
   ControlType = "Button",
   ButtonType  = "Toggle",
   Count       = 1,
-  UserPin     = showVolume,
+  UserPin     = true,
   PinStyle    = "Both"
 })
+
+
+-- -------------------------------------------------------------
+-- Discovered hostname -- auto-populated from HOSTNAME: field in
+-- each successful /status response. Shown on the Control page.
+-- -------------------------------------------------------------
+table.insert(ctrls, {
+  Name          = "DiscoveredName",
+  ControlType   = "Indicator",
+  IndicatorType = "Text",
+  Count         = 1,
+  UserPin       = false,
+  PinStyle      = "None"
+})
+

@@ -27,8 +27,7 @@ local host         = Properties["Hostname or IP"].Value
 local macProperty  = Properties["MAC Address"].Value
 local httpPort     = Properties["HTTP Port"].Value
 local authToken    = Properties["Auth Token"].Value
-local pollInterval = Properties["Poll Interval"].Value
-local debugPrint   = Properties["Debug Print"].Value
+local pollInterval = Properties["Poll Interval (s)"].Value
 
 local baseUrl    = string.format("http://%s:%d", host, httpPort)
 local authHeader = { Authorization = "Bearer " .. authToken }
@@ -40,6 +39,10 @@ local authHeader = { Authorization = "Bearer " .. authToken }
 -- only needs to set the property for the very first WOL before the PC
 -- has ever been polled successfully.
 local cachedMac = (macProperty ~= "") and macProperty or nil
+
+-- premuteVolume stores the volume level at the moment Mute is engaged,
+-- so we can restore it when the user unmutes.
+local premuteVolume = nil
 
 
 -- -------------------------------------------------------------
@@ -59,9 +62,7 @@ local function SetState(newState)
   if State == newState then return end
   State = newState
 
-  if debugPrint ~= "None" then
-    print("[WinPC] State -> " .. newState)
-  end
+  print("[WinPC] State -> " .. newState)
 
   -- Update the Controls to reflect the new state.
   if newState == "ONLINE" then
@@ -87,13 +88,10 @@ end
 
 
 -- -------------------------------------------------------------
--- Debug helper -- prints Tx/Rx when Debug Print is Tx/Rx or All
--- -------------------------------------------------------------
-
+-- Debug helper -- always prints to the Q-SYS Core log (visible in the
+-- built-in Debug Output window below the plugin panel).
 local function dbg(dir, msg)
-  if debugPrint == "All" or debugPrint == "Tx/Rx" then
-    print("[WinPC][" .. dir .. "] " .. msg)
-  end
+  print("[WinPC][" .. dir .. "] " .. msg)
 end
 
 
@@ -227,10 +225,16 @@ local function SendShutdown()
   end)
 end
 
--- Send volume as an integer 0-100. The server maps this to the
--- Windows master volume via the Core Audio API.
+-- Send volume as an integer 0-100, clamped to the user-configured Min/Max.
+-- The server maps this to the Windows master volume via the Core Audio API.
+local function ClampVolume(v)
+  local lo = math.floor(Controls.VolumeMin.Value + 0.5)
+  local hi = math.floor(Controls.VolumeMax.Value + 0.5)
+  return math.max(lo, math.min(hi, math.floor(v + 0.5)))
+end
+
 local function SendVolume(pct)
-  http_post("VOLUME:" .. tostring(math.floor(pct)))
+  http_post("VOLUME:" .. tostring(ClampVolume(pct)))
 end
 
 -- Send mute state as "1" (muted) or "0" (not muted).
@@ -274,10 +278,18 @@ local function DoPoll()
 
       local status = ParseStatus(data)
 
-      -- Sync volume from server to Q-SYS fader.
+      -- Sync volume from server to Q-SYS fader (clamped to min/max, whole numbers).
       if status.VOLUME then
         local v = tonumber(status.VOLUME)
-        if v then Controls.Volume.Value = v end
+        if v then
+          local lo = math.floor(Controls.VolumeMin.Value + 0.5)
+          local hi = math.floor(Controls.VolumeMax.Value + 0.5)
+          -- Show warning LED if PC volume is outside our configured limits.
+          Controls.VolumeWarning.Boolean = (v < lo or v > hi)
+          -- Leave the fader at the clamped value so it doesn't mislead,
+          -- but don't push a new volume command back to the PC.
+          Controls.Volume.Value = ClampVolume(v)
+        end
       end
 
       -- Sync mute state from server to Q-SYS button.
@@ -285,12 +297,20 @@ local function DoPoll()
         Controls.Mute.Boolean = (status.MUTE == "1")
       end
 
-      -- If the server sent a MAC address, cache it for future WOL use.
-      -- This is how auto-discovery works -- no manual entry needed after
-      -- the first successful poll.
+      -- If the server sent a MAC address, cache it for future WOL use and
+      -- write it back to the MAC Address property so it survives Core restarts.
+      -- Only writes when the value changes to avoid dirtying the design unnecessarily.
       if status.MAC and status.MAC ~= "" then
-        cachedMac = status.MAC
-        dbg("Rx", "MAC auto-discovered and cached: " .. cachedMac)
+        if cachedMac ~= status.MAC then
+          cachedMac = status.MAC
+          Properties["MAC Address"].Value = cachedMac
+          dbg("Rx", "MAC auto-discovered and saved: " .. cachedMac)
+        end
+      end
+
+      -- Update the discovered hostname displayed on the Control page.
+      if status.HOSTNAME and status.HOSTNAME ~= "" then
+        Controls.DiscoveredName.String = status.HOSTNAME
       end
 
       -- Record the timestamp of the last successful poll.
@@ -314,9 +334,7 @@ local function DoPoll()
         SetState("OFFLINE")
       end
 
-      if debugPrint ~= "None" then
-        print("[WinPC] Poll failed: " .. tostring(err or code))
-      end
+      print("[WinPC] Poll failed: " .. tostring(err or code))
     end
   end)
 end
@@ -355,16 +373,36 @@ Controls.Shutdown.EventHandler = function()
   SendShutdown()
 end
 
--- Volume: Syncs the fader value to Windows master volume (0-100).
+-- Volume: Syncs the fader value to Windows master volume (0-100 integer, clamped to Min/Max).
+-- The clamp runs unconditionally so the fader snaps back even during emulation.
 Controls.Volume.EventHandler = function()
+  local clamped = ClampVolume(Controls.Volume.Value)
+  if Controls.Volume.Value ~= clamped then
+    Controls.Volume.Value = clamped  -- snap fader back; this re-fires the handler but clamped==value so no loop
+  end
   if not RequireOnline("Volume") then return end
-  SendVolume(Controls.Volume.Value)
+  SendVolume(clamped)
 end
 
 -- Mute: Syncs the toggle button to Windows master mute.
+-- When muting, saves the current volume so it can be restored on unmute.
 Controls.Mute.EventHandler = function()
   if not RequireOnline("Mute") then return end
-  SendMute(Controls.Mute.Boolean)
+  local muting = Controls.Mute.Boolean
+  if muting then
+    -- Capture the current volume before muting so we can restore it later.
+    premuteVolume = Controls.Volume.Value
+    dbg("Tx", "Muting -- saving pre-mute volume: " .. tostring(premuteVolume))
+  else
+    -- Unmuting: restore the saved volume (if we have one).
+    if premuteVolume ~= nil then
+      dbg("Tx", "Unmuting -- restoring volume to: " .. tostring(premuteVolume))
+      Controls.Volume.Value = premuteVolume
+      SendVolume(premuteVolume)
+      premuteVolume = nil
+    end
+  end
+  SendMute(muting)
 end
 
 
@@ -373,6 +411,9 @@ end
 -- -------------------------------------------------------------
 
 SetState("OFFLINE")
+Controls.VolumeMin.Value       = 0
+Controls.VolumeMax.Value       = 100
+Controls.VolumeWarning.Boolean = false
 pollTimer:Start(pollInterval)
 print("[WinPC] Plugin started. Polling " .. (host ~= "" and host or "(no hostname set)") .. " every " .. pollInterval .. "s.")
 

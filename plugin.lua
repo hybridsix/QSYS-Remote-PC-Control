@@ -35,7 +35,7 @@
 -- Change to a different RGB triple if branding changes.
 -- -------------------------------------------------------------
 function GetColor(props)
-  return { 21, 163, 213 }
+  return { 0, 210, 255 }
 end
 
 
@@ -50,16 +50,15 @@ end
 function GetPrettyName(props)
   local name = props["Computer Name"].Value
   if name ~= "" then
-    return "Win PC Control  |  " .. name
+    return "Win PC Control\n" .. name
   end
-  return "Win PC Control  |  (unconfigured)"
+  return "Win PC Control\n(unconfigured)"
 end
 
 
 -- -------------------------------------------------------------
 -- PageNames
--- Defines the tab pages shown in the plugin's control panel.
--- Must be defined before GetPages() since pages.lua references it.
+-- Fixed page list: Control and Setup only.
 -- -------------------------------------------------------------
 PageNames = { "Control", "Setup" }
 
@@ -69,6 +68,7 @@ PageNames = { "Control", "Setup" }
 -- Populates the pages table from PageNames via pages.lua.
 -- -------------------------------------------------------------
 function GetPages(props)
+  PageNames = { "Control", "Setup" }
   local pages = {}
   --[[ #include "pages.lua" ]]
   return pages

@@ -77,7 +77,7 @@ table.insert(props, {
 -- 30 seconds is a reasonable default for most installs.
 -- -------------------------------------------------------------
 table.insert(props, {
-  Name  = "Poll Interval",
+  Name  = "Poll Interval (s)",
   Type  = "integer",
   Min   = 5,
   Max   = 300,
@@ -85,43 +85,6 @@ table.insert(props, {
 })
 
 
--- -------------------------------------------------------------
--- PIN VISIBILITY
--- Controls which sets of pins are exposed on the plugin block.
--- Allows the integrator to hide pins that aren't being used
--- in their design to keep the schematic tidy.
--- -------------------------------------------------------------
-table.insert(props, {
-  Name  = "Show Power Pins",
-  Type  = "boolean",
-  Value = true
-})
-
-table.insert(props, {
-  Name  = "Show Volume Pins",
-  Type  = "boolean",
-  Value = true
-})
-
-table.insert(props, {
-  Name  = "Show Status Pins",
-  Type  = "boolean",
-  Value = true
-})
 
 
--- -------------------------------------------------------------
--- DEBUG
--- Controls how much is printed to the Q-SYS Core log.
---   None  -- Silent. Use in production.
---   Tx/Rx -- Logs every HTTP request and response code.
---   All   -- Same as Tx/Rx (reserved for future expansion).
--- Hidden by rectify_properties.lua when set to None to reduce
--- visual clutter in the Properties panel.
--- -------------------------------------------------------------
-table.insert(props, {
-  Name    = "Debug Print",
-  Type    = "enum",
-  Choices = { "None", "Tx/Rx", "All" },
-  Value   = "None"
-})
+

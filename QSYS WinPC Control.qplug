@@ -58,7 +58,7 @@ PluginInfo = {
 -- Change to a different RGB triple if branding changes.
 -- -------------------------------------------------------------
 function GetColor(props)
-  return { 21, 163, 213 }
+  return { 0, 210, 255 }
 end
 
 
@@ -73,16 +73,15 @@ end
 function GetPrettyName(props)
   local name = props["Computer Name"].Value
   if name ~= "" then
-    return "Win PC Control  |  " .. name
+    return "Win PC Control\n" .. name
   end
-  return "Win PC Control  |  (unconfigured)"
+  return "Win PC Control\n(unconfigured)"
 end
 
 
 -- -------------------------------------------------------------
 -- PageNames
--- Defines the tab pages shown in the plugin's control panel.
--- Must be defined before GetPages() since pages.lua references it.
+-- Fixed page list: Control and Setup only.
 -- -------------------------------------------------------------
 PageNames = { "Control", "Setup" }
 
@@ -92,6 +91,7 @@ PageNames = { "Control", "Setup" }
 -- Populates the pages table from PageNames via pages.lua.
 -- -------------------------------------------------------------
 function GetPages(props)
+  PageNames = { "Control", "Setup" }
   local pages = {}
   -- =============================================================
   -- pages.lua -- Win PC Control
@@ -220,7 +220,7 @@ function GetProperties()
   -- 30 seconds is a reasonable default for most installs.
   -- -------------------------------------------------------------
   table.insert(props, {
-    Name  = "Poll Interval",
+    Name  = "Poll Interval (s)",
     Type  = "integer",
     Min   = 5,
     Max   = 300,
@@ -228,46 +228,9 @@ function GetProperties()
   })
   
   
-  -- -------------------------------------------------------------
-  -- PIN VISIBILITY
-  -- Controls which sets of pins are exposed on the plugin block.
-  -- Allows the integrator to hide pins that aren't being used
-  -- in their design to keep the schematic tidy.
-  -- -------------------------------------------------------------
-  table.insert(props, {
-    Name  = "Show Power Pins",
-    Type  = "boolean",
-    Value = true
-  })
-  
-  table.insert(props, {
-    Name  = "Show Volume Pins",
-    Type  = "boolean",
-    Value = true
-  })
-  
-  table.insert(props, {
-    Name  = "Show Status Pins",
-    Type  = "boolean",
-    Value = true
-  })
   
   
-  -- -------------------------------------------------------------
-  -- DEBUG
-  -- Controls how much is printed to the Q-SYS Core log.
-  --   None  -- Silent. Use in production.
-  --   Tx/Rx -- Logs every HTTP request and response code.
-  --   All   -- Same as Tx/Rx (reserved for future expansion).
-  -- Hidden by rectify_properties.lua when set to None to reduce
-  -- visual clutter in the Properties panel.
-  -- -------------------------------------------------------------
-  table.insert(props, {
-    Name    = "Debug Print",
-    Type    = "enum",
-    Choices = { "None", "Tx/Rx", "All" },
-    Value   = "None"
-  })
+  
   return props
 end
 
@@ -315,11 +278,7 @@ function RectifyProperties(props)
   --   someone sets it to Tx/Rx or All via the Properties panel.
   -- =============================================================
   
-  if props["Debug Print"].Value == "None" then
-    props["Debug Print"].IsHidden = true
-  else
-    props["Debug Print"].IsHidden = false
-  end
+  -- No dynamic property visibility adjustments required.
   return props
 end
 
@@ -378,42 +337,26 @@ function GetControls(props)
   -- controls.lua -- Win PC Control
   --
   -- Defines all Q-SYS control objects for this plugin.
-  -- Controls are the interactive elements the operator sees and
-  -- uses -- buttons, LEDs, faders, etc.
-  --
-  -- Control definitions here set the type, behavior, and whether
-  -- the control appears as an external pin on the schematic block.
-  -- The visual layout (position, size, color) lives in layout.lua.
-  --
-  -- PinStyle options:
-  --   "Input"  -- Pin receives signals from external sources
-  --   "Output" -- Pin sends signals to external destinations
-  --   "Both"   -- Pin can do either (for knobs/faders)
-  --
-  -- UserPin: when true, the control appears as a pin on the block
-  --   face. Driven by the Show Power/Volume/Status Pins properties
-  --   so the integrator can hide unused pins.
+  -- Types, behaviors, and pin visibility.
+  -- Visual layout lives in layout.lua.
   -- =============================================================
   
   
-  local showPower  = props["Show Power Pins"].Value
-  local showVolume = props["Show Volume Pins"].Value
-  local showStatus = props["Show Status Pins"].Value
+  -- Pin visibility is controlled by UserPin=true checkboxes in the Properties panel.
+  -- PinStyle sets the default state: a real style = checked (visible); "None" = unchecked (hidden).
   
   
   -- -------------------------------------------------------------
-  -- POWER CONTROLS
-  -- Both are momentary buttons (they spring back when released).
-  -- PowerOn sends a Wake-on-LAN magic packet via UDP.
-  -- Shutdown sends an HTTP POST command to the Windows server.
-  -- Both are Input-only pins -- they receive trigger pulses.
+  -- Power controls
+  -- PowerOn sends a Wake-on-LAN magic packet.
+  -- Shutdown sends an HTTP POST to the Windows server.
   -- -------------------------------------------------------------
   table.insert(ctrls, {
     Name        = "PowerOn",
     ControlType = "Button",
     ButtonType  = "Momentary",
     Count       = 1,
-    UserPin     = showPower,
+    UserPin     = true,
     PinStyle    = "Input",
     Icon        = "Power"
   })
@@ -423,25 +366,21 @@ function GetControls(props)
     ControlType = "Button",
     ButtonType  = "Momentary",
     Count       = 1,
-    UserPin     = showPower,
+    UserPin     = true,
     PinStyle    = "Input",
     Icon        = "Power"
   })
   
   
   -- -------------------------------------------------------------
-  -- STATUS CONTROLS
-  -- All Output-only -- they reflect PC state back to Q-SYS.
-  -- OnlineStatus: Boolean LED (true = online, false = offline)
-  -- StatusText:   String showing current state (Online, Booting, etc.)
-  -- LastPoll:     Timestamp string of the last successful /status poll
+  -- Status indicators -- all output-only, reflect PC state.
   -- -------------------------------------------------------------
   table.insert(ctrls, {
     Name          = "OnlineStatus",
     ControlType   = "Indicator",
     IndicatorType = "LED",
     Count         = 1,
-    UserPin       = showStatus,
+    UserPin       = true,
     PinStyle      = "Output"
   })
   
@@ -450,7 +389,7 @@ function GetControls(props)
     ControlType   = "Indicator",
     IndicatorType = "Text",
     Count         = 1,
-    UserPin       = showStatus,
+    UserPin       = true,
     PinStyle      = "Output"
   })
   
@@ -459,28 +398,54 @@ function GetControls(props)
     ControlType   = "Indicator",
     IndicatorType = "Text",
     Count         = 1,
-    UserPin       = showStatus,
+    UserPin       = true,
     PinStyle      = "Output"
   })
   
   
   -- -------------------------------------------------------------
-  -- AUDIO CONTROLS
-  -- Volume: Knob/fader, 0-100 percent. PinStyle Both means an
-  --   external source can drive the volume OR it can be read out.
-  -- Mute:   Toggle button. PinStyle Both for same reason.
-  -- Both sync bidirectionally -- the poll timer updates them from
-  -- the server, and operator changes are sent back to Windows.
+  -- Audio controls -- bidirectional, poll timer keeps them in sync.
   -- -------------------------------------------------------------
   table.insert(ctrls, {
     Name        = "Volume",
     ControlType = "Knob",
-    ControlUnit = "Percent",
+    ControlUnit = "Integer",
     Min         = 0,
     Max         = 100,
     Count       = 1,
-    UserPin     = showVolume,
+    UserPin     = true,
     PinStyle    = "Both"
+  })
+  
+  table.insert(ctrls, {
+    Name        = "VolumeMin",
+    ControlType = "Knob",
+    ControlUnit = "Integer",
+    Min         = 0,
+    Max         = 100,
+    Count       = 1,
+    UserPin     = false,
+    PinStyle    = "None"
+  })
+  
+  table.insert(ctrls, {
+    Name        = "VolumeMax",
+    ControlType = "Knob",
+    ControlUnit = "Integer",
+    Min         = 0,
+    Max         = 100,
+    Count       = 1,
+    UserPin     = false,
+    PinStyle    = "None"
+  })
+  
+  table.insert(ctrls, {
+    Name          = "VolumeWarning",
+    ControlType   = "Indicator",
+    IndicatorType = "LED",
+    Count         = 1,
+    UserPin       = false,
+    PinStyle      = "None"
   })
   
   table.insert(ctrls, {
@@ -488,9 +453,24 @@ function GetControls(props)
     ControlType = "Button",
     ButtonType  = "Toggle",
     Count       = 1,
-    UserPin     = showVolume,
+    UserPin     = true,
     PinStyle    = "Both"
   })
+  
+  
+  -- -------------------------------------------------------------
+  -- Discovered hostname -- auto-populated from HOSTNAME: field in
+  -- each successful /status response. Shown on the Control page.
+  -- -------------------------------------------------------------
+  table.insert(ctrls, {
+    Name          = "DiscoveredName",
+    ControlType   = "Indicator",
+    IndicatorType = "Text",
+    Count         = 1,
+    UserPin       = false,
+    PinStyle      = "None"
+  })
+  
   return ctrls
 end
 
@@ -509,136 +489,232 @@ function GetControlLayout(props)
   -- ============================================================
   -- CONTROL PAGE
   -- ============================================================
+    -- Layout constants — 5px grid, panel width = 500px (boxes x=5, w=490):
+    --
+    --  Power Control box:   y=5,   h=80  → bottom=85
+    --  gap=10
+    --  Status box:          y=95,  h=125  → bottom=220
+    --  gap=10
+    --  Audio box:           y=230, h=110
+    --
+    local W          = 490   -- box interior width
+    local statusY    = 95
+    local statusBoxH = 125
+    local audioY     = 230
+    local panelH     = audioY + 110 + 10
+  
   if CurrentPage == "Control" then
   
-    -- Background
+    -- ---- Power Control box: y=5, h=80 ----
     table.insert(graphics, {
-      Type        = "GroupBox",
-      Text        = "",
-      Fill        = { 43, 43, 43 },   -- Paint it Black
-      StrokeWidth = 0,
-      Position    = { 0, 0 },
-      Size        = { 400, 228 }
+      Type         = "GroupBox",
+      Text         = "Power Control",
+      Fill         = { 195, 195, 195 },
+      StrokeWidth  = 2,
+      StrokeColor  = { 0, 210, 255 },
+      CornerRadius = 8,
+      Position     = { 5, 5 },
+      Size         = { W, 80 }
     })
   
-    -- ---- Power Control ----
-    table.insert(graphics, {
-      Type        = "GroupBox",
-      Text        = "Power Control",
-      Fill        = { 3, 75, 88 },    -- Dazzling Blue
-      StrokeWidth = 1,
-      StrokeColor = { 21, 163, 213 }, -- Patch of Blue
-      Position    = { 5, 5 },
-      Size        = { 390, 52 }
-    })
-  
+    -- Buttons: 130px wide each, 20px gap, centered in W=490
+    -- total = 2*130+20 = 280; left edge = (490-280)/2 + 5 = 110
     layout["PowerOn"] = {
       PrettyName = "Power~Wake (WOL)",
       Style      = "Button",
-      Legend     = "Power On",
-      Position   = { 12, 23 },
-      Size       = { 115, 26 },
-      Color      = { 0, 180, 0 }
+      Legend     = "Power On (WOL)",
+      Position   = { 110, 35 },
+      Size       = { 130, 30 },
+      Color      = { 0, 200, 220 }
     }
   
     layout["Shutdown"] = {
       PrettyName = "Power~Shutdown",
       Style      = "Button",
       Legend     = "Shutdown",
-      Position   = { 135, 23 },
-      Size       = { 115, 26 },
-      Color      = { 200, 70, 30 }
+      Position   = { 260, 35 },
+      Size       = { 130, 30 },
+      Color      = { 255, 140, 0 }
     }
   
-    -- ---- Connection Status ----
+    -- ---- Connection Status box: y=95 ----
     table.insert(graphics, {
-      Type        = "GroupBox",
-      Text        = "Connection Status",
-      Fill        = { 3, 104, 128 },  -- Blue Suede
-      StrokeWidth = 1,
-      StrokeColor = { 21, 163, 213 }, -- Patch of Blue
-      Position    = { 5, 65 },
-      Size        = { 390, 82 }
+      Type         = "GroupBox",
+      Text         = "Connection Status",
+      Fill         = { 200, 200, 200 },
+      StrokeWidth  = 2,
+      StrokeColor  = { 0, 210, 255 },
+      CornerRadius = 8,
+      Position     = { 5, statusY },
+      Size         = { W, statusBoxH }
     })
+  
+    -- Label column: right-aligned, x=10, w=75, ends at x=85
+    -- LED:          x=90, w=20, ends at x=110
+    -- Text box:     x=115, w=355 (fills to box right edge 5+490-10=485 → 485-115=370, snap to 355 leaving 15px margin)
+    local labelX  = 10
+    local labelW  = 75
+    local ledX    = 90
+    local textX   = 115
+    local textW   = 355
   
     table.insert(graphics, {
       Type        = "Text",
       Text        = "Status:",
-      Position    = { 12, 84 },
-      Size        = { 52, 18 },
-      FontSize    = 12,
+      Position    = { labelX, statusY + 30 },
+      Size        = { labelW, 20 },
+      FontSize    = 11,
       HTextAlign  = "Right",
-      Color       = { 207, 204, 204 } -- Silver Springs
+      Color       = { 60, 60, 60 }
     })
   
     layout["OnlineStatus"] = {
       PrettyName = "Status~Online",
       Style      = "Indicator",
-      Position   = { 70, 85 },
-      Size       = { 20, 20 }
+      Position   = { ledX, statusY + 32 },
+      Size       = { 16, 16 }
     }
   
     layout["StatusText"] = {
       PrettyName = "Status~Text",
       Style      = "Text",
-      Position   = { 97, 85 },
-      Size       = { 190, 20 },
-      FontSize   = 12
+      Position   = { textX, statusY + 30 },
+      Size       = { textW, 20 },
+      FontSize   = 11
+    }
+  
+    table.insert(graphics, {
+      Type       = "Text",
+      Text       = "PC Name:",
+      Position   = { labelX, statusY + 55 },
+      Size       = { labelW, 20 },
+      FontSize   = 11,
+      HTextAlign = "Right",
+      Color      = { 60, 60, 60 }
+    })
+  
+    layout["DiscoveredName"] = {
+      PrettyName = "Status~PC Hostname",
+      Style      = "Text",
+      Position   = { textX, statusY + 55 },
+      Size       = { textW, 20 },
+      FontSize   = 11
     }
   
     table.insert(graphics, {
       Type       = "Text",
       Text       = "Last Poll:",
-      Position   = { 12, 113 },
-      Size       = { 72, 16 },
+      Position   = { labelX, statusY + 80 },
+      Size       = { labelW, 20 },
       FontSize   = 11,
       HTextAlign = "Right",
-      Color      = { 207, 204, 204 } -- Silver Springs
+      Color      = { 60, 60, 60 }
     })
   
     layout["LastPoll"] = {
       PrettyName = "Status~Last Poll",
       Style      = "Text",
-      Position   = { 90, 113 },
-      Size       = { 200, 16 },
+      Position   = { textX, statusY + 80 },
+      Size       = { textW, 20 },
       FontSize   = 11
     }
   
-    -- ---- Audio ----
+    -- ---- Audio box: y=audioY, h=110 ----
     table.insert(graphics, {
-      Type        = "GroupBox",
-      Text        = "Audio",
-      Fill        = { 3, 104, 128 },  -- Blue Suede
-      StrokeWidth = 1,
-      StrokeColor = { 21, 163, 213 }, -- Patch of Blue
-      Position    = { 5, 155 },
-      Size        = { 390, 62 }
+      Type         = "GroupBox",
+      Text         = "Audio",
+      Fill         = { 195, 195, 195 },
+      StrokeWidth  = 2,
+      StrokeColor  = { 0, 210, 255 },
+      CornerRadius = 8,
+      Position     = { 5, audioY },
+      Size         = { W, 110 }
     })
   
+    -- Volume row: label | fader (stretches) | Mute button
+    -- Mute: 100px wide, 10px from right edge of box (5+490-10-100 = 385)
+    -- Fader: from x=75 to x=375 (300px wide)
     table.insert(graphics, {
       Type       = "Text",
       Text       = "Volume:",
-      Position   = { 12, 175 },
-      Size       = { 60, 16 },
+      Position   = { 10, audioY + 30 },
+      Size       = { 60, 20 },
       FontSize   = 12,
       HTextAlign = "Right",
-      Color      = { 207, 204, 204 } -- Silver Springs
+      Color      = { 60, 60, 60 }
     })
   
     layout["Volume"] = {
       PrettyName = "Audio~Volume",
       Style      = "Fader",
-      Position   = { 77, 173 },
-      Size       = { 215, 22 }
+      Position   = { 75, audioY + 30 },
+      Size       = { 300, 20 }
     }
   
     layout["Mute"] = {
       PrettyName = "Audio~Mute",
       Style      = "Button",
       Legend     = "Mute",
-      Position   = { 300, 171 },
-      Size       = { 88, 28 },
-      Color      = { 200, 50, 50 }
+      Position   = { 385, audioY + 25 },
+      Size       = { 100, 30 },
+      Color      = { 213, 0, 0 }
+    }
+  
+    -- Min/Max row: label | field | spacer | label | field | warning LED
+    -- Min label+field on left, Max label+field centered-ish, warning LED on far right
+    table.insert(graphics, {
+      Type       = "Text",
+      Text       = "Vol Min:",
+      Position   = { 10, audioY + 70 },
+      Size       = { 60, 20 },
+      FontSize   = 11,
+      HTextAlign = "Right",
+      Color      = { 60, 60, 60 }
+    })
+  
+    layout["VolumeMin"] = {
+      PrettyName = "Audio~Volume Min",
+      Style      = "TextBox",
+      Position   = { 75, audioY + 70 },
+      Size       = { 70, 20 },
+      FontSize   = 11
+    }
+  
+    table.insert(graphics, {
+      Type       = "Text",
+      Text       = "Vol Max:",
+      Position   = { 165, audioY + 70 },
+      Size       = { 60, 20 },
+      FontSize   = 11,
+      HTextAlign = "Right",
+      Color      = { 60, 60, 60 }
+    })
+  
+    layout["VolumeMax"] = {
+      PrettyName = "Audio~Volume Max",
+      Style      = "TextBox",
+      Position   = { 230, audioY + 70 },
+      Size       = { 70, 20 },
+      FontSize   = 11
+    }
+  
+    -- Warning LED + label: shown when PC volume is outside min/max
+    table.insert(graphics, {
+      Type       = "Text",
+      Text       = "Out of range:",
+      Position   = { 315, audioY + 70 },
+      Size       = { 80, 20 },
+      FontSize   = 10,
+      HTextAlign = "Right",
+      Color      = { 60, 60, 60 }
+    })
+  
+    layout["VolumeWarning"] = {
+      PrettyName = "Audio~Out of Range",
+      Style      = "Indicator",
+      Position   = { 400, audioY + 72 },
+      Size       = { 16, 16 },
+      Color      = { 255, 140, 0 }
     }
   
   -- ============================================================
@@ -646,24 +722,15 @@ function GetControlLayout(props)
   -- ============================================================
   elseif CurrentPage == "Setup" then
   
-    -- Background
     table.insert(graphics, {
-      Type        = "GroupBox",
-      Text        = "",
-      Fill        = { 43, 43, 43 },   -- Paint it Black
-      StrokeWidth = 0,
-      Position    = { 0, 0 },
-      Size        = { 400, 195 }
-    })
-  
-    table.insert(graphics, {
-      Type        = "GroupBox",
-      Text        = "Connection Configuration",
-      Fill        = { 3, 104, 128 },  -- Blue Suede
-      StrokeWidth = 1,
-      StrokeColor = { 21, 163, 213 }, -- Patch of Blue
-      Position    = { 5, 5 },
-      Size        = { 390, 180 }
+      Type         = "GroupBox",
+      Text         = "Connection Configuration",
+      Fill         = { 200, 200, 200 },
+      StrokeWidth  = 2,
+      StrokeColor  = { 0, 210, 255 },
+      CornerRadius = 8,
+      Position     = { 5, 5 },
+      Size         = { 490, 180 }
     })
   
     local function cfg_label(text, y)
@@ -674,7 +741,7 @@ function GetControlLayout(props)
         Size       = { 110, 16 },
         FontSize   = 11,
         HTextAlign = "Right",
-        Color      = { 207, 204, 204 } -- Silver Springs
+        Color      = { 60, 60, 60 }
       })
     end
   
@@ -683,37 +750,37 @@ function GetControlLayout(props)
         Type       = "Text",
         Text       = text,
         Position   = { 127, y },
-        Size       = { 260, 16 },
+        Size       = { 360, 16 },
         FontSize   = 11,
         HTextAlign = "Left",
-        Color      = { 247, 247, 247 } -- White Satin
+        Color      = { 30, 30, 30 }
       })
     end
   
-    cfg_label("Computer Name:",  24)
-    cfg_value(props["Computer Name"].Value ~= "" and props["Computer Name"].Value or "(not set)", 24)
+    cfg_label("Computer Name:",  35)
+    cfg_value(props["Computer Name"].Value ~= "" and props["Computer Name"].Value or "(not set)", 35)
   
-    cfg_label("Hostname / IP:",  44)
-    cfg_value(props["Hostname or IP"].Value ~= "" and props["Hostname or IP"].Value or "(not set)", 44)
+    cfg_label("Hostname / IP:",  55)
+    cfg_value(props["Hostname or IP"].Value ~= "" and props["Hostname or IP"].Value or "(not set)", 55)
   
-    cfg_label("MAC Address:",    64)
-    cfg_value(props["MAC Address"].Value ~= "" and props["MAC Address"].Value or "(auto-discover)", 64)
+    cfg_label("MAC Address:",    75)
+    cfg_value(props["MAC Address"].Value ~= "" and props["MAC Address"].Value or "(auto-discover)", 75)
   
-    cfg_label("HTTP Port:",      84)
-    cfg_value(tostring(props["HTTP Port"].Value), 84)
+    cfg_label("HTTP Port:",      95)
+    cfg_value(tostring(props["HTTP Port"].Value), 95)
   
-    cfg_label("Poll Interval:", 104)
-    cfg_value(tostring(props["Poll Interval"].Value) .. " seconds", 104)
+    cfg_label("Poll Interval:", 115)
+    cfg_value(tostring(props["Poll Interval (s)"].Value) .. " s", 115)
   
-    cfg_label("Auth Token:",    124)
+    cfg_label("Auth Token:",    135)
     local tokenSet = props["Auth Token"].Value ~= ""
-    cfg_value(tokenSet and "(configured)" or "NOT SET — run install.ps1 on PC first", 124)
+    cfg_value(tokenSet and "(configured)" or "NOT SET — run install.ps1 on PC first", 135)
   
     table.insert(graphics, {
       Type       = "Text",
       Text       = "Token is stored in C:\\QSYS WinPC Control\\config.txt on the Windows PC.",
-      Position   = { 12, 150 },
-      Size       = { 375, 14 },
+      Position   = { 12, 160 },
+      Size       = { 475, 14 },
       FontSize   = 9,
       HTextAlign = "Left",
       Color      = { 105, 104, 104 } -- Grey Seal
@@ -751,25 +818,18 @@ if Controls then
   -- =============================================================
   
   
-  -- =============================================================
-  -- SECTION 1: CONFIGURATION
-  -- Pull all user-set property values once at startup. These do
-  -- not change while the plugin is running -- a re-deploy is
-  -- required if properties are changed.
-  -- =============================================================
+  -- -------------------------------------------------------------
+  -- Configuration
+  -- Pull property values once at startup.
+  -- -------------------------------------------------------------
   
   local host         = Properties["Hostname or IP"].Value
   local macProperty  = Properties["MAC Address"].Value
   local httpPort     = Properties["HTTP Port"].Value
   local authToken    = Properties["Auth Token"].Value
-  local pollInterval = Properties["Poll Interval"].Value
-  local debugPrint   = Properties["Debug Print"].Value
+  local pollInterval = Properties["Poll Interval (s)"].Value
   
-  -- Build the base URL once so we don't repeat the format call everywhere.
-  -- Example: "http://192.168.1.50:2207"
   local baseUrl    = string.format("http://%s:%d", host, httpPort)
-  
-  -- Pre-build the auth header table used on every GET /status request.
   local authHeader = { Authorization = "Bearer " .. authToken }
   
   -- cachedMac holds the MAC address used for Wake-on-LAN.
@@ -780,22 +840,20 @@ if Controls then
   -- has ever been polled successfully.
   local cachedMac = (macProperty ~= "") and macProperty or nil
   
+  -- premuteVolume stores the volume level at the moment Mute is engaged,
+  -- so we can restore it when the user unmutes.
+  local premuteVolume = nil
   
-  -- =============================================================
-  -- SECTION 2: STATE MACHINE
+  
+  -- -------------------------------------------------------------
+  -- State machine
   --
-  -- The plugin tracks which of four states the PC is believed to be in.
-  -- State drives the status LED, status text, and guards against sending
-  -- commands to a PC that cannot receive them.
-  --
-  -- States:
-  --   OFFLINE       -- No response from the server. PC is off or unreachable.
-  --   BOOTING       -- WOL was just sent. Waiting for the server to come up.
-  --                    Poll failures in this state do NOT flip back to OFFLINE
-  --                    immediately, because the PC needs time to POST and boot.
-  --   ONLINE        -- Server responded with HTTP 200. PC is up and running.
-  --   SHUTTING_DOWN -- Shutdown command was accepted. Waiting for it to drop off.
-  -- =============================================================
+  -- OFFLINE       - no response from the server
+  -- BOOTING       - WOL sent, waiting for the server to come up
+  --                 (poll failures here don't immediately flip to OFFLINE)
+  -- ONLINE        - server responded HTTP 200
+  -- SHUTTING_DOWN - shutdown accepted, waiting for the PC to drop off
+  -- -------------------------------------------------------------
   
   local State = "OFFLINE"
   
@@ -804,9 +862,7 @@ if Controls then
     if State == newState then return end
     State = newState
   
-    if debugPrint ~= "None" then
-      print("[WinPC] State -> " .. newState)
-    end
+    print("[WinPC] State -> " .. newState)
   
     -- Update the Controls to reflect the new state.
     if newState == "ONLINE" then
@@ -831,30 +887,17 @@ if Controls then
   end
   
   
-  -- =============================================================
-  -- SECTION 3: DEBUG HELPER
-  --
-  -- Prints Tx/Rx messages to the Q-SYS Core log when Debug Print
-  -- is set to "Tx/Rx" or "All" in the plugin properties.
-  -- "dir" should be "Tx" or "Rx" to indicate direction.
-  -- =============================================================
-  
+  -- -------------------------------------------------------------
+  -- Debug helper -- always prints to the Q-SYS Core log (visible in the
+  -- built-in Debug Output window below the plugin panel).
   local function dbg(dir, msg)
-    if debugPrint == "All" or debugPrint == "Tx/Rx" then
-      print("[WinPC][" .. dir .. "] " .. msg)
-    end
+    print("[WinPC][" .. dir .. "] " .. msg)
   end
   
   
-  -- =============================================================
-  -- SECTION 4: HTTP TRANSPORT
-  --
-  -- Two functions wrap HttpClient.Download for our two endpoints.
-  -- HttpClient is a native Q-SYS v10+ API -- no third-party libs needed.
-  --
-  -- All requests include the Bearer token header for authentication.
-  -- The server returns 401 if the token doesn't match, and 200 on success.
-  -- =============================================================
+  -- -------------------------------------------------------------
+  -- HTTP transport
+  -- -------------------------------------------------------------
   
   -- http_post(cmd, callback)
   --   Sends a POST request to /command with a plain-text body.
@@ -914,22 +957,12 @@ if Controls then
   end
   
   
-  -- =============================================================
-  -- SECTION 5: WAKE-ON-LAN
-  --
-  -- Sends a standard WOL magic packet to the global UDP broadcast
-  -- address (255.255.255.255) on port 9.
-  --
-  -- Magic packet format:
-  --   6 bytes of 0xFF, followed by the target MAC address repeated 16 times.
-  --   Total: 102 bytes.
-  --
-  -- Requirements:
-  --   - The PC must have "Wake on LAN" enabled in its BIOS/UEFI.
-  --   - The NIC must have WOL enabled in Windows Device Manager.
-  --   - The Q-SYS Core and the PC must be on the same Layer 2 network
-  --     segment (or the router must forward directed broadcasts).
-  -- =============================================================
+  -- -------------------------------------------------------------
+  -- Wake-on-LAN
+  -- Broadcasts the standard 102-byte magic packet on UDP port 9.
+  -- Requires WOL enabled in BIOS and the NIC driver, and the Core
+  -- must be on the same L2 segment as the target PC.
+  -- -------------------------------------------------------------
   
   local function SendWOL()
     local mac = cachedMac
@@ -975,13 +1008,9 @@ if Controls then
   end
   
   
-  -- =============================================================
-  -- SECTION 6: COMMAND SENDERS
-  --
-  -- These functions translate button presses and control changes
-  -- into HTTP POST commands to the Windows server.
-  -- Command strings must match what WinPCControlServer.ps1 expects.
-  -- =============================================================
+  -- -------------------------------------------------------------
+  -- Command senders
+  -- -------------------------------------------------------------
   
   -- Tell the PC to shut down. If the server confirms with 200, we move
   -- to SHUTTING_DOWN state so polls don't immediately flip back to OFFLINE.
@@ -996,10 +1025,16 @@ if Controls then
     end)
   end
   
-  -- Send volume as an integer 0-100. The server maps this to the
-  -- Windows master volume via the Core Audio API.
+  -- Send volume as an integer 0-100, clamped to the user-configured Min/Max.
+  -- The server maps this to the Windows master volume via the Core Audio API.
+  local function ClampVolume(v)
+    local lo = math.floor(Controls.VolumeMin.Value + 0.5)
+    local hi = math.floor(Controls.VolumeMax.Value + 0.5)
+    return math.max(lo, math.min(hi, math.floor(v + 0.5)))
+  end
+  
   local function SendVolume(pct)
-    http_post("VOLUME:" .. tostring(math.floor(pct)))
+    http_post("VOLUME:" .. tostring(ClampVolume(pct)))
   end
   
   -- Send mute state as "1" (muted) or "0" (not muted).
@@ -1008,25 +1043,14 @@ if Controls then
   end
   
   
-  -- =============================================================
-  -- SECTION 7: POLL TIMER
-  --
-  -- A Timer fires every N seconds (set by the Poll Interval property)
-  -- and sends a GET /status to check whether the PC is up and to
-  -- sync volume/mute values back to Q-SYS.
-  --
-  -- The response body is plain text with one KEY:VALUE pair per line.
-  -- ParseStatus() converts that into a Lua table for easy access.
-  -- =============================================================
+  -- -------------------------------------------------------------
+  -- Poll timer
+  -- Fires every N seconds, sends GET /status, syncs volume and mute.
+  -- -------------------------------------------------------------
   
   local pollTimer = Timer.New()
   
-  -- ParseStatus(body)
-  --   Converts the plain-text status body into a key/value table.
-  --   Input example:
-  --     "VOLUME:75\r\nMUTE:0\r\nMAC:AA:BB:CC:DD:EE:FF\r\nUPDATED:2026-03-20 14:30:00"
-  --   Output example:
-  --     { VOLUME="75", MUTE="0", MAC="AA:BB:CC:DD:EE:FF", UPDATED="2026-03-20 14:30:00" }
+  -- ParseStatus: converts the plain-text /status body into a key/value table.
   local function ParseStatus(body)
     local status = {}
     for line in body:gmatch("[^\r\n]+") do
@@ -1054,10 +1078,18 @@ if Controls then
   
         local status = ParseStatus(data)
   
-        -- Sync volume from server to Q-SYS fader.
+        -- Sync volume from server to Q-SYS fader (clamped to min/max, whole numbers).
         if status.VOLUME then
           local v = tonumber(status.VOLUME)
-          if v then Controls.Volume.Value = v end
+          if v then
+            local lo = math.floor(Controls.VolumeMin.Value + 0.5)
+            local hi = math.floor(Controls.VolumeMax.Value + 0.5)
+            -- Show warning LED if PC volume is outside our configured limits.
+            Controls.VolumeWarning.Boolean = (v < lo or v > hi)
+            -- Leave the fader at the clamped value so it doesn't mislead,
+            -- but don't push a new volume command back to the PC.
+            Controls.Volume.Value = ClampVolume(v)
+          end
         end
   
         -- Sync mute state from server to Q-SYS button.
@@ -1065,12 +1097,20 @@ if Controls then
           Controls.Mute.Boolean = (status.MUTE == "1")
         end
   
-        -- If the server sent a MAC address, cache it for future WOL use.
-        -- This is how auto-discovery works -- no manual entry needed after
-        -- the first successful poll.
+        -- If the server sent a MAC address, cache it for future WOL use and
+        -- write it back to the MAC Address property so it survives Core restarts.
+        -- Only writes when the value changes to avoid dirtying the design unnecessarily.
         if status.MAC and status.MAC ~= "" then
-          cachedMac = status.MAC
-          dbg("Rx", "MAC auto-discovered and cached: " .. cachedMac)
+          if cachedMac ~= status.MAC then
+            cachedMac = status.MAC
+            Properties["MAC Address"].Value = cachedMac
+            dbg("Rx", "MAC auto-discovered and saved: " .. cachedMac)
+          end
+        end
+  
+        -- Update the discovered hostname displayed on the Control page.
+        if status.HOSTNAME and status.HOSTNAME ~= "" then
+          Controls.DiscoveredName.String = status.HOSTNAME
         end
   
         -- Record the timestamp of the last successful poll.
@@ -1094,9 +1134,7 @@ if Controls then
           SetState("OFFLINE")
         end
   
-        if debugPrint ~= "None" then
-          print("[WinPC] Poll failed: " .. tostring(err or code))
-        end
+        print("[WinPC] Poll failed: " .. tostring(err or code))
       end
     end)
   end
@@ -1105,13 +1143,9 @@ if Controls then
   pollTimer.EventHandler = DoPoll
   
   
-  -- =============================================================
-  -- SECTION 8: GUARD FUNCTION
-  --
-  -- Prevents sending audio/power commands when the PC is not ONLINE.
-  -- Returns true if the command should proceed, false if it should be
-  -- silently dropped (with a log message for debugging).
-  -- =============================================================
+  -- -------------------------------------------------------------
+  -- Guard: drops commands silently if the PC isn't ONLINE.
+  -- -------------------------------------------------------------
   
   local function RequireOnline(label)
     if State ~= "ONLINE" then
@@ -1122,13 +1156,9 @@ if Controls then
   end
   
   
-  -- =============================================================
-  -- SECTION 9: CONTROL EVENT HANDLERS
-  --
-  -- These wire up the Q-SYS Controls (buttons, knobs) to the
-  -- functions above. Each handler fires when the operator interacts
-  -- with the control on a UCI or the schematic.
-  -- =============================================================
+  -- -------------------------------------------------------------
+  -- Control event handlers
+  -- -------------------------------------------------------------
   
   -- PowerOn: Sends a Wake-on-LAN magic packet.
   -- This works even when the PC is OFFLINE -- that's the whole point.
@@ -1143,27 +1173,47 @@ if Controls then
     SendShutdown()
   end
   
-  -- Volume: Syncs the fader value to Windows master volume (0-100).
+  -- Volume: Syncs the fader value to Windows master volume (0-100 integer, clamped to Min/Max).
+  -- The clamp runs unconditionally so the fader snaps back even during emulation.
   Controls.Volume.EventHandler = function()
+    local clamped = ClampVolume(Controls.Volume.Value)
+    if Controls.Volume.Value ~= clamped then
+      Controls.Volume.Value = clamped  -- snap fader back; this re-fires the handler but clamped==value so no loop
+    end
     if not RequireOnline("Volume") then return end
-    SendVolume(Controls.Volume.Value)
+    SendVolume(clamped)
   end
   
   -- Mute: Syncs the toggle button to Windows master mute.
+  -- When muting, saves the current volume so it can be restored on unmute.
   Controls.Mute.EventHandler = function()
     if not RequireOnline("Mute") then return end
-    SendMute(Controls.Mute.Boolean)
+    local muting = Controls.Mute.Boolean
+    if muting then
+      -- Capture the current volume before muting so we can restore it later.
+      premuteVolume = Controls.Volume.Value
+      dbg("Tx", "Muting -- saving pre-mute volume: " .. tostring(premuteVolume))
+    else
+      -- Unmuting: restore the saved volume (if we have one).
+      if premuteVolume ~= nil then
+        dbg("Tx", "Unmuting -- restoring volume to: " .. tostring(premuteVolume))
+        Controls.Volume.Value = premuteVolume
+        SendVolume(premuteVolume)
+        premuteVolume = nil
+      end
+    end
+    SendMute(muting)
   end
   
   
-  -- =============================================================
-  -- SECTION 10: STARTUP
-  --
-  -- Set initial state and start the poll timer.
-  -- This code runs once when the Q-SYS Core loads the plugin.
-  -- =============================================================
+  -- -------------------------------------------------------------
+  -- Startup
+  -- -------------------------------------------------------------
   
   SetState("OFFLINE")
+  Controls.VolumeMin.Value       = 0
+  Controls.VolumeMax.Value       = 100
+  Controls.VolumeWarning.Boolean = false
   pollTimer:Start(pollInterval)
   print("[WinPC] Plugin started. Polling " .. (host ~= "" and host or "(no hostname set)") .. " every " .. pollInterval .. "s.")
   
