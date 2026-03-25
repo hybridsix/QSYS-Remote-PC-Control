@@ -70,7 +70,10 @@ catch {
 # ---- Step 3: Generate auth token and write config ----
 Write-Step "Generating auth token"
 try {
-    $tokenBytes = [System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32)
+    $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    $tokenBytes = New-Object byte[] 32
+    $rng.GetBytes($tokenBytes)
+    $rng.Dispose()
     $token = [System.Convert]::ToBase64String($tokenBytes)
 
     $configContent = "PORT=$Port`r`nTOKEN=$token`r`n"
