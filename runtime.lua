@@ -41,10 +41,6 @@ local authHeader = { Authorization = "Bearer " .. authToken }
 -- has ever been polled successfully.
 local cachedMac = (macProperty ~= "") and macProperty or nil
 
--- premuteVolume stores the volume level at the moment Mute is engaged,
--- so we can restore it when the user unmutes.
-local premuteVolume = nil
-
 -- syncedFromPc is false until the first successful poll sets the fader
 -- from the PC's actual volume. While false, Volume/Mute event handlers
 -- do not send commands, preventing startup from overwriting Windows volume.
@@ -74,6 +70,7 @@ local volRampFrom      = nil          -- starting volume of current ramp
 local volRampTo        = nil          -- target volume of current ramp
 local volRampStart     = nil          -- os.clock() when ramp began
 local lastKnownPcVol   = 0            -- last volume reported by the PC
+local userAdjusting    = false        -- true while debounce/ramp is active; suppresses poll sync
 
 
 -- -------------------------------------------------------------
@@ -350,25 +347,32 @@ local function DoPoll()
       -- Sync volume and mute from the poll response.
       -- updatingFromPoll prevents the EventHandlers from echoing these values
       -- back to the PC as commands (which would override user input).
+      -- Skip volume/mute sync entirely if the user is actively adjusting
+      -- (debounce pending or ramp in progress) to avoid feedback loops
+      -- where stale poll data fights the outgoing ramp values.
       updatingFromPoll = true
 
       -- Sync volume from server to Q-SYS fader (clamped to min/max, whole numbers).
       if status.VOLUME then
         local v = tonumber(status.VOLUME)
         if v then
-          lastKnownPcVol = v
+          if not userAdjusting then
+            lastKnownPcVol = v
+          end
           local lo = math.floor(Controls.VolumeMin.Value + 0.5)
           local hi = math.floor(Controls.VolumeMax.Value + 0.5)
           -- Show warning LED if PC volume is outside our configured limits.
           Controls.VolumeWarning.Boolean = (v < lo or v > hi)
-          -- Leave the fader at the clamped value so it doesn't mislead,
-          -- but don't push a new volume command back to the PC.
-          Controls.Volume.Value = ClampVolume(v)
+          if not userAdjusting then
+            -- Leave the fader at the clamped value so it doesn't mislead,
+            -- but don't push a new volume command back to the PC.
+            Controls.Volume.Value = ClampVolume(v)
+          end
         end
       end
 
       -- Sync mute state from server to Q-SYS button.
-      if status.MUTE then
+      if status.MUTE and not userAdjusting then
         Controls.Mute.Boolean = (status.MUTE == "1")
       end
 
@@ -479,6 +483,8 @@ end
 -- StartVolumeRamp(target)
 --   Ramps from lastKnownPcVol to target over rampTime seconds.
 --   If rampTime is 0, sends immediately with no ramp.
+--   The ramp updates the Q-SYS fader visually each tick but only sends
+--   a single HTTP command at the end, to avoid flooding the connection pool.
 local function StartVolumeRamp(target)
   -- Stop any in-progress ramp.
   volRampTimer:Stop()
@@ -486,6 +492,7 @@ local function StartVolumeRamp(target)
   if rampTime <= 0 then
     -- Instant mode: just send the final value.
     SendVolume(target)
+    userAdjusting = false
     return
   end
 
@@ -501,14 +508,17 @@ local function StartVolumeRamp(target)
     local elapsed = os.clock() - volRampStart
     local progress = elapsed / rampTime
     if progress >= 1.0 then
-      -- Ramp complete — send the final value and stop.
+      -- Ramp complete — send the final value to the PC and stop.
       volRampTimer:Stop()
       SendVolume(volRampTo)
+      userAdjusting = false
       dbg("Tx", "Ramp complete at " .. volRampTo)
     else
-      -- Interpolate and send intermediate value.
+      -- Interpolate and update the fader visually only (no HTTP send).
       local current = math.floor(volRampFrom + (volRampTo - volRampFrom) * progress + 0.5)
-      SendVolume(current)
+      updatingFromPoll = true   -- suppress EventHandler echo
+      Controls.Volume.Value = current
+      updatingFromPoll = false
     end
   end
   volRampTimer:Start(tickInterval)
@@ -530,6 +540,7 @@ Controls.Volume.EventHandler = function()
 
   -- Cancel any in-progress ramp while the user is still dragging.
   volRampTimer:Stop()
+  userAdjusting = true  -- suppress poll sync until ramp completes
 
   -- Reset the debounce timer. It fires 300ms after the last fader movement.
   volDebounceTimer:Stop()
@@ -541,26 +552,11 @@ Controls.Volume.EventHandler = function()
 end
 
 -- Mute: Syncs the toggle button to Windows master mute.
--- When muting, saves the current volume so it can be restored on unmute.
 Controls.Mute.EventHandler = function()
   if updatingFromPoll then return end   -- poll is syncing; don't echo back to PC
   if not syncedFromPc then return end   -- don't overwrite PC mute before first poll
   if not RequireOnline("Mute") then return end
-  local muting = Controls.Mute.Boolean
-  if muting then
-    -- Capture the current volume before muting so we can restore it later.
-    premuteVolume = Controls.Volume.Value
-    dbg("Tx", "Muting -- saving pre-mute volume: " .. tostring(premuteVolume))
-  else
-    -- Unmuting: restore the saved volume (if we have one).
-    if premuteVolume ~= nil then
-      dbg("Tx", "Unmuting -- restoring volume to: " .. tostring(premuteVolume))
-      Controls.Volume.Value = premuteVolume
-      SendVolume(premuteVolume)
-      premuteVolume = nil
-    end
-  end
-  SendMute(muting)
+  SendMute(Controls.Mute.Boolean)
 end
 
 
