@@ -28,6 +28,7 @@ local macProperty  = Properties["MAC Address"].Value
 local httpPort     = Properties["HTTP Port"].Value
 local authToken    = Properties["Auth Token"].Value
 local pollInterval = Properties["Poll Interval (s)"].Value
+local rampTime     = Properties["Volume Ramp Time (s)"].Value
 
 local baseUrl    = string.format("http://%s:%d", host, httpPort)
 local authHeader = { Authorization = "Bearer " .. authToken }
@@ -63,6 +64,16 @@ local shuttingDownSince = nil
 -- Q-SYS controls. Blocks the EventHandlers from echoing the PC's own state
 -- back as a command, which would cause poll responses to override user input.
 local updatingFromPoll = false
+
+-- Volume debounce/ramp state.
+-- When the user drags the fader, we wait until they stop (debounce), then
+-- ramp from the last known PC volume to the target over rampTime seconds.
+local volDebounceTimer = Timer.New()  -- fires after fader stops moving
+local volRampTimer     = Timer.New()  -- fires every tick during a ramp
+local volRampFrom      = nil          -- starting volume of current ramp
+local volRampTo        = nil          -- target volume of current ramp
+local volRampStart     = nil          -- os.clock() when ramp began
+local lastKnownPcVol   = 0            -- last volume reported by the PC
 
 
 -- -------------------------------------------------------------
@@ -290,7 +301,9 @@ local function ClampVolume(v)
 end
 
 local function SendVolume(pct)
-  http_post("VOLUME:" .. tostring(ClampVolume(pct)))
+  local v = ClampVolume(pct)
+  lastKnownPcVol = v
+  http_post("VOLUME:" .. tostring(v))
 end
 
 -- Send mute state as "1" (muted) or "0" (not muted).
@@ -343,6 +356,7 @@ local function DoPoll()
       if status.VOLUME then
         local v = tonumber(status.VOLUME)
         if v then
+          lastKnownPcVol = v
           local lo = math.floor(Controls.VolumeMin.Value + 0.5)
           local hi = math.floor(Controls.VolumeMax.Value + 0.5)
           -- Show warning LED if PC volume is outside our configured limits.
@@ -462,8 +476,49 @@ Controls.Shutdown.EventHandler = function()
   SendShutdown()
 end
 
+-- StartVolumeRamp(target)
+--   Ramps from lastKnownPcVol to target over rampTime seconds.
+--   If rampTime is 0, sends immediately with no ramp.
+local function StartVolumeRamp(target)
+  -- Stop any in-progress ramp.
+  volRampTimer:Stop()
+
+  if rampTime <= 0 then
+    -- Instant mode: just send the final value.
+    SendVolume(target)
+    return
+  end
+
+  volRampFrom  = lastKnownPcVol
+  volRampTo    = target
+  volRampStart = os.clock()
+
+  dbg("Tx", "Ramping volume: " .. volRampFrom .. " -> " .. volRampTo .. " over " .. rampTime .. "s")
+
+  -- Tick every 100ms during the ramp.
+  local tickInterval = 0.1
+  volRampTimer.EventHandler = function()
+    local elapsed = os.clock() - volRampStart
+    local progress = elapsed / rampTime
+    if progress >= 1.0 then
+      -- Ramp complete — send the final value and stop.
+      volRampTimer:Stop()
+      SendVolume(volRampTo)
+      dbg("Tx", "Ramp complete at " .. volRampTo)
+    else
+      -- Interpolate and send intermediate value.
+      local current = math.floor(volRampFrom + (volRampTo - volRampFrom) * progress + 0.5)
+      SendVolume(current)
+    end
+  end
+  volRampTimer:Start(tickInterval)
+end
+
+
 -- Volume: Syncs the fader value to Windows master volume (0-100 integer, clamped to Min/Max).
 -- The clamp runs unconditionally so the fader snaps back even during emulation.
+-- Uses debounce: waits 300ms after the user stops moving the fader, then ramps
+-- from the current PC volume to the new target over the configured ramp time.
 Controls.Volume.EventHandler = function()
   if updatingFromPoll then return end  -- poll is syncing; don't echo back to PC
   local clamped = ClampVolume(Controls.Volume.Value)
@@ -472,7 +527,17 @@ Controls.Volume.EventHandler = function()
   end
   if not syncedFromPc then return end  -- don't overwrite PC volume before first poll
   if not RequireOnline("Volume") then return end
-  SendVolume(clamped)
+
+  -- Cancel any in-progress ramp while the user is still dragging.
+  volRampTimer:Stop()
+
+  -- Reset the debounce timer. It fires 300ms after the last fader movement.
+  volDebounceTimer:Stop()
+  volDebounceTimer.EventHandler = function()
+    volDebounceTimer:Stop()
+    StartVolumeRamp(clamped)
+  end
+  volDebounceTimer:Start(0.3)
 end
 
 -- Mute: Syncs the toggle button to Windows master mute.

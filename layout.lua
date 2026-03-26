@@ -246,7 +246,7 @@ elseif CurrentPage == "Setup" then
     StrokeColor  = { 0, 210, 255 },
     CornerRadius = 8,
     Position     = { 5, 5 },
-    Size         = { 490, 180 }
+    Size         = { 490, 200 }
   })
 
   local function cfg_label(text, y)
@@ -288,14 +288,17 @@ elseif CurrentPage == "Setup" then
   cfg_label("Poll Interval:", 115)
   cfg_value(tostring(props["Poll Interval (s)"].Value) .. " s", 115)
 
-  cfg_label("Auth Token:",    135)
+  cfg_label("Vol Ramp Time:", 135)
+  cfg_value(tostring(props["Volume Ramp Time (s)"].Value) .. " s", 135)
+
+  cfg_label("Auth Token:",    155)
   local tokenSet = props["Auth Token"].Value ~= ""
   cfg_value(tokenSet and "(configured)" or "NOT SET — run install.ps1 on PC first", 135)
 
   table.insert(graphics, {
     Type       = "Text",
     Text       = "Token is stored in C:\\QSYS WinPC Control\\config.txt on the Windows PC.",
-    Position   = { 12, 160 },
+    Position   = { 12, 180 },
     Size       = { 475, 14 },
     FontSize   = 9,
     HTextAlign = "Left",

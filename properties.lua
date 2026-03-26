@@ -85,6 +85,21 @@ table.insert(props, {
 })
 
 
+-- -------------------------------------------------------------
+-- VOLUME RAMP
+-- When the user releases the fader, the plugin ramps from the
+-- current PC volume to the new target over this many seconds.
+-- Set to 0 for instant (no ramp). Max 10 seconds.
+-- -------------------------------------------------------------
+table.insert(props, {
+  Name  = "Volume Ramp Time (s)",
+  Type  = "integer",
+  Min   = 0,
+  Max   = 10,
+  Value = 1
+})
+
+
 
 
 
