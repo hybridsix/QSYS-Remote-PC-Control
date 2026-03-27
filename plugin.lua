@@ -48,11 +48,15 @@ end
 -- as a reminder that setup is needed.
 -- -------------------------------------------------------------
 function GetPrettyName(props)
+  -- Use non-breaking spaces (U+00A0) so Q-SYS doesn't word-wrap
+  -- the title on the block face. In UTF-8, U+00A0 is \xC2\xA0.
+  local nbsp = "\xC2\xA0"
+  local title = "Win" .. nbsp .. "PC" .. nbsp .. "Control"
   local name = props["Computer Name"].Value
   if name ~= "" then
-    return "Win PC Control\n" .. name
+    return title .. "\n" .. name
   end
-  return "Win PC Control\n(unconfigured)"
+  return title .. "\n(unconfigured)"
 end
 
 

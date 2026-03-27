@@ -71,11 +71,15 @@ end
 -- as a reminder that setup is needed.
 -- -------------------------------------------------------------
 function GetPrettyName(props)
+  -- Use non-breaking spaces (U+00A0) so Q-SYS doesn't word-wrap
+  -- the title on the block face. In UTF-8, U+00A0 is \xC2\xA0.
+  local nbsp = "\xC2\xA0"
+  local title = "Win" .. nbsp .. "PC" .. nbsp .. "Control"
   local name = props["Computer Name"].Value
   if name ~= "" then
-    return "Win PC Control\n" .. name
+    return title .. "\n" .. name
   end
-  return "Win PC Control\n(unconfigured)"
+  return title .. "\n(unconfigured)"
 end
 
 
@@ -606,7 +610,7 @@ function GetControlLayout(props)
     -- Buttons: 130px wide each, 20px gap, centered in W=490
     -- total = 2*130+20 = 280; left edge = (490-280)/2 + 5 = 110
     layout["PowerOn"] = {
-      PrettyName = "Power~Wake (WOL)",
+      PrettyName = "Pwr~WOL",
       Style      = "Button",
       Legend     = "Power On (WOL)",
       Position   = { 110, 35 },
@@ -615,7 +619,7 @@ function GetControlLayout(props)
     }
   
     layout["Shutdown"] = {
-      PrettyName = "Power~Shutdown",
+      PrettyName = "Pwr~Shutdown",
       Style      = "Button",
       Legend     = "Shutdown",
       Position   = { 260, 35 },
@@ -734,14 +738,14 @@ function GetControlLayout(props)
     })
   
     layout["Volume"] = {
-      PrettyName = "Audio~Volume",
+      PrettyName = "Audio~Vol",
       Style      = "Fader",
       Position   = { 75, audioY + 30 },
       Size       = { 240, 20 }
     }
   
     layout["VolumeEntry"] = {
-      PrettyName = "Audio~Volume Entry",
+      PrettyName = "Audio~Vol Entry",
       Style      = "TextBox",
       Position   = { 320, audioY + 28 },
       Size       = { 55, 24 },

@@ -34,7 +34,7 @@ if CurrentPage == "Control" then
   -- Buttons: 130px wide each, 20px gap, centered in W=490
   -- total = 2*130+20 = 280; left edge = (490-280)/2 + 5 = 110
   layout["PowerOn"] = {
-    PrettyName = "Power~Wake (WOL)",
+    PrettyName = "Pwr~WOL",
     Style      = "Button",
     Legend     = "Power On (WOL)",
     Position   = { 110, 35 },
@@ -43,7 +43,7 @@ if CurrentPage == "Control" then
   }
 
   layout["Shutdown"] = {
-    PrettyName = "Power~Shutdown",
+    PrettyName = "Pwr~Shutdown",
     Style      = "Button",
     Legend     = "Shutdown",
     Position   = { 260, 35 },
@@ -162,14 +162,14 @@ if CurrentPage == "Control" then
   })
 
   layout["Volume"] = {
-    PrettyName = "Audio~Volume",
+    PrettyName = "Audio~Vol",
     Style      = "Fader",
     Position   = { 75, audioY + 30 },
     Size       = { 240, 20 }
   }
 
   layout["VolumeEntry"] = {
-    PrettyName = "Audio~Volume Entry",
+    PrettyName = "Audio~Vol Entry",
     Style      = "TextBox",
     Position   = { 320, audioY + 28 },
     Size       = { 55, 24 },
