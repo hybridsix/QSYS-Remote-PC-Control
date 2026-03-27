@@ -12,7 +12,7 @@
 -- accepts GET /status and POST /command requests, protected by
 -- a Bearer token stored in C:\QSYS WinPC Control\config.txt on the PC.
 --
--- Power on uses Wake-on-LAN (UDP magic packet, port 9).
+-- Power on uses Wake-on-LAN (UDP magic packet, ports 7 and 9).
 -- Volume and mute use the Windows Core Audio API via inline C#
 -- inside WinPCControlServer.ps1.
 -- =============================================================
@@ -293,7 +293,7 @@ local function SendVolume(pct)
   http_post("VOLUME:" .. tostring(ClampVolume(pct)))
 end
 
--- Rate limiter: caps volume sends to 5/sec (200ms interval).
+-- Rate limiter: caps volume sends to 10/sec (100ms interval).
 -- Buffered value ensures the final fader position is always sent.
 local VOL_RATE_INTERVAL = 0.1  -- seconds
 local volLastSendTime = 0

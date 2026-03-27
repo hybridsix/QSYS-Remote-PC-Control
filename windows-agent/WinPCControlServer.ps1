@@ -12,7 +12,7 @@
 # Config: C:\QSYS WinPC Control\config.txt  (PORT=, TOKEN=)
 # Log:    C:\QSYS WinPC Control\server.log
 #
-# Version: 0.1
+# Version: 0.2.0-alpha
 # ================================================================
 
 
@@ -351,10 +351,6 @@ function Invoke-QSYSCommand {
             Write-Log "Shutdown command received - initiating"
             Start-Sleep -Seconds 1   # Allow HTTP response to complete first
             & shutdown /s /f /t 0
-        }
-        "QUERY" {
-            # No-op - status is always returned in the response body
-            Write-Log "QUERY received"
         }
         default {
             Write-Log "WARNING: unknown command '$command'"

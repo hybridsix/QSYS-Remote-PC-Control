@@ -6,7 +6,7 @@
 # Removes: Scheduled Task, Firewall rule, URL ACL,
 #          and C:\QSYS WinPC Control\
 #
-# Version: 0.1
+# Version: 0.2.0-alpha
 # ================================================================
 
 #Requires -RunAsAdministrator

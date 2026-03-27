@@ -74,7 +74,7 @@ table.insert(props, {
 -- How often (in seconds) to send GET /status to check if the
 -- PC is online and to sync volume/mute back to Q-SYS.
 -- Shorter interval = faster status updates but more traffic.
--- 30 seconds is a reasonable default for most installs.
+-- 15 seconds is a reasonable default for most installs.
 -- -------------------------------------------------------------
 table.insert(props, {
   Name  = "Poll Interval (s)",
@@ -83,8 +83,4 @@ table.insert(props, {
   Max   = 300,
   Value = 15
 })
-
-
-
-
 

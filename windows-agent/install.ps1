@@ -3,7 +3,7 @@
 # One-time setup for WinPC Control on a Windows 11 PC.
 # Run as Administrator. Run once per machine / per user account.
 #
-# Version: 0.1
+# Version: 0.2.0-alpha
 # ============================================================
 
 #Requires -RunAsAdministrator

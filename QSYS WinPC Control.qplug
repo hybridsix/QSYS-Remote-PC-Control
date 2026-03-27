@@ -43,7 +43,7 @@
 PluginInfo = {
   Name        = "Hybridsix Plugins~Win PC Control",
   Version     = "0.2.0-alpha",
-  BuildVersion= "0.2.0.2",
+  BuildVersion= "0.2.0.3",
   Id          = "dd941513-d452-416e-95eb-b47d08457b36",
   Author      = "Michael King",
   Description = "Remote control a Windows PC from Q-SYS: Wake-on-LAN power on, volume and mute via HTTP, and live status polling."
@@ -80,13 +80,6 @@ end
 
 
 -- -------------------------------------------------------------
--- PageNames
--- Fixed page list: Control and Setup only.
--- -------------------------------------------------------------
-PageNames = { "Control", "Setup" }
-
-
--- -------------------------------------------------------------
 -- GetPages(props)
 -- Populates the pages table from PageNames via pages.lua.
 -- -------------------------------------------------------------
@@ -101,8 +94,8 @@ function GetPages(props)
   --
   -- Current pages:
   --   Control -- operator-facing buttons, faders, status indicators
-  --   Setup   -- read-only display of current property values,
-  --              shown here for reference without opening Properties
+  --   Setup   -- editable configuration fields for runtime changes
+  --              without reopening the Properties panel
   -- =============================================================
   
   for ix, name in ipairs(PageNames) do
@@ -217,7 +210,7 @@ function GetProperties()
   -- How often (in seconds) to send GET /status to check if the
   -- PC is online and to sync volume/mute back to Q-SYS.
   -- Shorter interval = faster status updates but more traffic.
-  -- 30 seconds is a reasonable default for most installs.
+  -- 15 seconds is a reasonable default for most installs.
   -- -------------------------------------------------------------
   table.insert(props, {
     Name  = "Poll Interval (s)",
@@ -226,10 +219,6 @@ function GetProperties()
     Max   = 300,
     Value = 15
   })
-  
-  
-  
-  
   
   return props
 end
@@ -524,7 +513,7 @@ function GetControls(props)
     Name        = "CfgHttpPort",
     ControlType = "Knob",
     ControlUnit = "Integer",
-    Min         = 1,
+    Min         = 1024,
     Max         = 65535,
     Count       = 1,
     UserPin     = false,
@@ -535,7 +524,7 @@ function GetControls(props)
     Name        = "CfgPollInterval",
     ControlType = "Knob",
     ControlUnit = "Integer",
-    Min         = 1,
+    Min         = 5,
     Max         = 300,
     Count       = 1,
     UserPin     = false,
@@ -956,7 +945,7 @@ if Controls then
   -- accepts GET /status and POST /command requests, protected by
   -- a Bearer token stored in C:\QSYS WinPC Control\config.txt on the PC.
   --
-  -- Power on uses Wake-on-LAN (UDP magic packet, port 9).
+  -- Power on uses Wake-on-LAN (UDP magic packet, ports 7 and 9).
   -- Volume and mute use the Windows Core Audio API via inline C#
   -- inside WinPCControlServer.ps1.
   -- =============================================================
@@ -1237,7 +1226,7 @@ if Controls then
     http_post("VOLUME:" .. tostring(ClampVolume(pct)))
   end
   
-  -- Rate limiter: caps volume sends to 5/sec (200ms interval).
+  -- Rate limiter: caps volume sends to 10/sec (100ms interval).
   -- Buffered value ensures the final fader position is always sent.
   local VOL_RATE_INTERVAL = 0.1  -- seconds
   local volLastSendTime = 0
