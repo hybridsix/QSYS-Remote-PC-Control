@@ -1,4 +1,4 @@
-# Win PC Control - Windows Agent
+# Remote PC Control - Windows Agent
 
 This folder contains the files that run on the Windows PC being controlled.
 
@@ -22,7 +22,7 @@ That is all you need to do on the PC. The server starts automatically at every l
 | File | Purpose |
 |---|---|
 | `install.ps1` | One-time setup - run as Administrator |
-| `WinPCControlServer.ps1` | The HTTP server - do not run manually, the installer handles it |
+| `RemotePCControlServer.ps1` | The HTTP server - do not run manually, the installer handles it |
 | `uninstall.ps1` | Removes everything install.ps1 created - run as Administrator |
 
 ## Optional: custom port

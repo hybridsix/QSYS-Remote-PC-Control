@@ -1,5 +1,5 @@
 -- =============================================================
--- pins.lua -- Win PC Control
+-- pins.lua -- Remote PC Control
 --
 -- Defines any non-control external signal pins for this plugin
 -- (e.g. analog audio inputs/outputs, GPIO). This plugin has

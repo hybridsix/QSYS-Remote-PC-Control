@@ -1,4 +1,4 @@
-# Win PC Control - Q-SYS Plugin
+# Remote PC Control - Q-SYS Plugin
 
 **Author:** Michael King / Hybridsix
 **Version:** 0.2.0-alpha
@@ -30,7 +30,7 @@ Q-SYS Core  ---- HTTP GET /status ---->  Windows PC
             ---- UDP :7,:9 (WOL) ----->  power on (3 bursts)
 ```
 
-A small PowerShell HTTP server (`WinPCControlServer.ps1`) runs silently in the Windows user session at every logon, started by a Scheduled Task. It uses the Windows Core Audio API to read and set volume/mute, and responds to commands from the Q-SYS Core.
+A small PowerShell HTTP server (`RemotePCControlServer.ps1`) runs silently in the Windows user session at every logon, started by a Scheduled Task. It uses the Windows Core Audio API to read and set volume/mute, and responds to commands from the Q-SYS Core.
 
 The Q-SYS plugin polls the server at a configurable interval (default 15 s) and tracks one of four states: **OFFLINE**, **BOOTING**, **ONLINE**, or **SHUTTING_DOWN**.
 
@@ -67,12 +67,12 @@ To use a non-default port:
 ```
 
 The installer will:
-1. Create `C:\QSYS WinPC Control\` as the working directory
-2. Copy `WinPCControlServer.ps1` into it
+1. Create `C:\QSYS Remote PC Control\` as the working directory
+2. Copy `RemotePCControlServer.ps1` into it
 3. Generate a random 32-byte auth token and write it to `config.txt`
 4. Register a URL ACL so the server can bind without elevation
-5. Add a Windows Firewall rule (`WinPC Control HTTP`) for the chosen port
-6. Create a Scheduled Task (`WinPC Control Server`) that starts the server at every user logon
+5. Add a Windows Firewall rule (`Remote PC Control HTTP`) for the chosen port
+6. Create a Scheduled Task (`Remote PC Control Server`) that starts the server at every user logon
 
 At the end of the install, the token is printed to the console - **copy it**. You will need it in the next step.
 
@@ -80,10 +80,10 @@ To remove everything cleanly, run `uninstall.ps1` as Administrator.
 
 ### 2. Q-SYS Designer setup
 
-1. Copy `QSYS WinPC Control.qplug` to:
-   `%USERPROFILE%\Documents\QSC\Q-Sys Designer\Plugins\QSYS WinPC Control\`
+1. Copy `QSYS Remote PC Control.qplug` to:
+   `%USERPROFILE%\Documents\QSC\Q-Sys Designer\Plugins\QSYS Remote PC Control\`
 2. Restart Q-SYS Designer (or use **Manage Plugins** to reload)
-3. Drag **Hybridsix Software -> Win PC Control** from the component library onto your schematic
+3. Drag **Hybridsix Software -> Remote PC Control** from the component library onto your schematic
 4. Open the plugin's **Properties** panel and fill in:
 
 | Property | Value |
@@ -125,7 +125,7 @@ This is useful when the PC is connected to a fixed-level system and you want to 
 
 - All HTTP requests carry an `Authorization: Bearer <token>` header
 - The token is a cryptographically random 32-byte value, Base64-encoded (~43 characters)
-- The token is stored in `C:\QSYS WinPC Control\config.txt` on the PC and must be copied manually into Q-SYS Designer - it is never transmitted in the clear during normal operation (only in HTTP headers, so use on a trusted LAN)
+- The token is stored in `C:\QSYS Remote PC Control\config.txt` on the PC and must be copied manually into Q-SYS Designer - it is never transmitted in the clear during normal operation (only in HTTP headers, so use on a trusted LAN)
 - The server only binds to the configured port - it does not listen on any other interface or port
 
 ---
@@ -134,11 +134,11 @@ This is useful when the PC is connected to a fixed-level system and you want to 
 
 | Symptom | Check |
 |---|---|
-| Status always shows Offline | Ping the PC from another device. Check the Firewall rule (`WinPC Control HTTP`). Verify the Scheduled Task is running. |
+| Status always shows Offline | Ping the PC from another device. Check the Firewall rule (`Remote PC Control HTTP`). Verify the Scheduled Task is running. |
 | Auth errors in the log | Token mismatch - re-copy the token from `config.txt` on the PC into the plugin's Auth Token property |
 | WOL does not work | BIOS WOL must be enabled. NIC "Wake on Magic Packet" must be enabled in Device Manager. The Core must be on the same broadcast domain as the PC (or use a directed broadcast). |
 | Volume changes do not stick | Check that no other application is overriding the Windows audio session. |
-| Server does not start after reboot | Check Task Scheduler -> `WinPC Control Server`. Verify the task runs as the correct user and that the user account logs in automatically. |
+| Server does not start after reboot | Check Task Scheduler -> `Remote PC Control Server`. Verify the task runs as the correct user and that the user account logs in automatically. |
 
 ---
 
@@ -147,12 +147,12 @@ This is useful when the PC is connected to a fixed-level system and you want to 
 | File | Where | Purpose |
 |---|---|---|
 | `windows-agent/install.ps1` | Run on Windows PC (as Administrator) | One-time setup |
-| `windows-agent/WinPCControlServer.ps1` | Copied to `C:\QSYS WinPC Control\` by installer | The HTTP server - do not run manually |
+| `windows-agent/RemotePCControlServer.ps1` | Copied to `C:\QSYS Remote PC Control\` by installer | The HTTP server - do not run manually |
 | `windows-agent/uninstall.ps1` | Run on Windows PC (as Administrator) | Clean removal |
 | `windows-agent/test-audio.ps1` | Run from repo folder when troubleshooting | Diagnostic: tests 5 Core Audio API methods to identify driver support |
-| `QSYS WinPC Control.qplug` | Q-SYS Designer plugins folder | The compiled plugin |
-| `C:\QSYS WinPC Control\config.txt` | Windows PC | PORT= and TOKEN= - do not edit manually |
-| `C:\QSYS WinPC Control\server.log` | Windows PC | Rolling server log (capped at 500 lines) |
+| `QSYS Remote PC Control.qplug` | Q-SYS Designer plugins folder | The compiled plugin |
+| `C:\QSYS Remote PC Control\config.txt` | Windows PC | PORT= and TOKEN= - do not edit manually |
+| `C:\QSYS Remote PC Control\server.log` | Windows PC | Rolling server log (capped at 500 lines) |
 
 ---
 

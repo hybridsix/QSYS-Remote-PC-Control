@@ -1,6 +1,6 @@
 # ================================================================
 # uninstall.ps1
-# Removes all WinPC Control components from this PC.
+# Removes all Remote PC Control components from this PC.
 # Run as Administrator.
 #
 # Removes: Scheduled Task, Firewall rule, URL ACL,
@@ -15,8 +15,8 @@ param(
     [int]$Port = 2207
 )
 
-$WORK_DIR  = "C:\QSYS WinPC Control"
-$TASK_NAME = "WinPC Control Server"
+$WORK_DIR  = "C:\QSYS Remote PC Control"
+$TASK_NAME = "Remote PC Control Server"
 
 function Write-Step ([string]$msg) {
     Write-Host ""
@@ -29,7 +29,7 @@ function Write-OK ([string]$msg) {
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor White
-Write-Host "  WinPC Control - Uninstall" -ForegroundColor White
+Write-Host "  Remote PC Control - Uninstall" -ForegroundColor White
 Write-Host "================================================" -ForegroundColor White
 
 # Read port from config if present (overrides param default)
@@ -57,7 +57,7 @@ catch {
 # ---- Remove Firewall rule ----
 Write-Step "Removing Firewall rule 'WinPC Control HTTP'"
 try {
-    Remove-NetFirewallRule -DisplayName "WinPC Control HTTP" -ErrorAction SilentlyContinue
+    Remove-NetFirewallRule -DisplayName "Remote PC Control HTTP" -ErrorAction SilentlyContinue
     Write-OK "Firewall rule removed"
 }
 catch {

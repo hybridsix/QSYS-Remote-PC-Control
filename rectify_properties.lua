@@ -1,5 +1,5 @@
 -- =============================================================
--- rectify_properties.lua -- Win PC Control
+-- rectify_properties.lua -- Remote PC Control
 --
 -- Called by Q-SYS Designer after loading properties, allowing
 -- us to show/hide or modify properties dynamically based on

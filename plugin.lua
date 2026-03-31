@@ -1,5 +1,5 @@
 -- =============================================================
--- plugin.lua -- Win PC Control
+-- plugin.lua -- Remote PC Control
 -- Author: Michael King
 --
 -- This is the ENTRY POINT for the Q-SYS plugin compiler (PLUGCC).
@@ -51,7 +51,7 @@ function GetPrettyName(props)
   -- Use non-breaking spaces (U+00A0) so Q-SYS doesn't word-wrap
   -- the title on the block face. In UTF-8, U+00A0 is \xC2\xA0.
   local nbsp = "\xC2\xA0"
-  local title = "Win" .. nbsp .. "PC" .. nbsp .. "Control"
+  local title = "Remote" .. nbsp .. "PC" .. nbsp .. "Control"
   local name = props["Computer Name"].Value
   if name ~= "" then
     return title .. "\n" .. name

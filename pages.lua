@@ -1,5 +1,5 @@
 -- =============================================================
--- pages.lua -- Win PC Control
+-- pages.lua -- Remote PC Control
 --
 -- Populates the pages table from the PageNames list defined in
 -- plugin.lua. Each entry creates one tab in the plugin panel.

@@ -1,4 +1,4 @@
-# WinPC Control — Ubuntu Agent
+# Remote PC Control — Ubuntu Agent
 
 HTTP control server that lets a Q-SYS Core remotely control volume, mute, and power on an Ubuntu 24.04 LTS PC.
 
@@ -30,7 +30,7 @@ That's it. The server starts immediately and auto-starts on every boot.
 | Step | Action |
 |------|--------|
 | 1 | Installs `python3` and `pulseaudio-utils` if missing |
-| 2 | Creates `/opt/qsys-winpc-control/` working directory |
+| 2 | Creates `/opt/qsys-remotepc-control/` working directory |
 | 3 | Copies the server script and uninstall script |
 | 4 | Generates a random 32-byte Base64 auth token |
 | 5 | Adds a sudoers rule for passwordless `shutdown` |
@@ -50,26 +50,26 @@ Default port: **2207** (same as the Windows agent).
 
 ```bash
 # Check status
-systemctl --user status winpc-control
+systemctl --user status remotepc-control
 
 # View live logs
-journalctl --user -u winpc-control -f
+journalctl --user -u remotepc-control -f
 
 # Restart
-systemctl --user restart winpc-control
+systemctl --user restart remotepc-control
 
 # Stop
-systemctl --user stop winpc-control
+systemctl --user stop remotepc-control
 ```
 
 ## Log file
 
-Server logs are written to `/opt/qsys-winpc-control/server.log` and automatically trimmed to 500 lines.
+Server logs are written to `/opt/qsys-remotepc-control/server.log` and automatically trimmed to 500 lines.
 
 ## Uninstalling
 
 ```bash
-sudo bash /opt/qsys-winpc-control/uninstall.sh
+sudo bash /opt/qsys-remotepc-control/uninstall.sh
 ```
 
 This removes the systemd service, firewall rule, sudoers entry, and the working directory.
@@ -94,4 +94,4 @@ The server waits up to 30 seconds for PipeWire/PulseAudio at startup. If audio s
 Make sure `pactl` works from your user session: `pactl get-sink-volume @DEFAULT_SINK@`. If it fails, PipeWire or PulseAudio may not be running for your user.
 
 **Shutdown doesn't work:**
-Verify the sudoers rule exists: `sudo cat /etc/sudoers.d/winpc-control`. If missing, re-run `install.sh`.
+Verify the sudoers rule exists: `sudo cat /etc/sudoers.d/remotepc-control`. If missing, re-run `install.sh`.

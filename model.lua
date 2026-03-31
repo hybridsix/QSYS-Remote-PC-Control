@@ -1,5 +1,5 @@
 -- =============================================================
--- model.lua -- Win PC Control
+-- model.lua -- Remote PC Control
 --
 -- Defines the hardware model list shown in the plugin's
 -- Properties panel under "Model". For plugins that support
@@ -8,4 +8,4 @@
 -- property values. This plugin has a single model.
 -- =============================================================
 
-table.insert(model, { "Win PC Control" })
+table.insert(model, { "Remote PC Control" })

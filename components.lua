@@ -1,5 +1,5 @@
 -- =============================================================
--- components.lua -- Win PC Control
+-- components.lua -- Remote PC Control
 --
 -- Declares any internal Q-SYS DSP components used by the plugin
 -- (e.g. mixers, delays, routers). This plugin performs no DSP

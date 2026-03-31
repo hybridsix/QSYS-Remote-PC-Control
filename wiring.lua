@@ -1,5 +1,5 @@
 -- =============================================================
--- wiring.lua -- Win PC Control
+-- wiring.lua -- Remote PC Control
 --
 -- Defines signal routing between any internal Q-SYS components
 -- declared in components.lua. This plugin uses no internal

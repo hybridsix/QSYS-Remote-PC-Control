@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # ============================================================
 # install.sh
-# One-time setup for WinPC Control on Ubuntu 24.04 LTS.
+# One-time setup for Remote PC Control on Ubuntu 24.04 LTS.
 # Run with sudo:  sudo bash install.sh
 #
 # Creates:
-#   /opt/qsys-winpc-control/           Working directory
-#   /opt/qsys-winpc-control/config.txt Config (PORT=, TOKEN=)
-#   ~/.config/systemd/user/winpc-control.service  Systemd user service
-#   /etc/sudoers.d/winpc-control       Passwordless shutdown
+#   /opt/qsys-remotepc-control/           Working directory
+#   /opt/qsys-remotepc-control/config.txt Config (PORT=, TOKEN=)
+#   ~/.config/systemd/user/remotepc-control.service  Systemd user service
+#   /etc/sudoers.d/remotepc-control       Passwordless shutdown
 #   UFW rule for the configured port
 #
 # Version: 0.1.0-alpha
@@ -19,12 +19,12 @@ set -euo pipefail
 PORT="${1:-2207}"
 TOKEN="${2:-}"
 
-WORK_DIR="/opt/qsys-winpc-control"
-SERVER_SCRIPT="winpc-control-server.py"
+WORK_DIR="/opt/qsys-remotepc-control"
+SERVER_SCRIPT="remotepc-control-server.py"
 CONFIG_FILE="$WORK_DIR/config.txt"
 LOG_FILE="$WORK_DIR/install.log"
-SERVICE_NAME="winpc-control"
-SUDOERS_FILE="/etc/sudoers.d/winpc-control"
+SERVICE_NAME="remotepc-control"
+SUDOERS_FILE="/etc/sudoers.d/remotepc-control"
 
 # Must run as root
 if [[ $EUID -ne 0 ]]; then
@@ -51,7 +51,7 @@ fail()  { echo "     FAIL: $1"; exit 1; }
 
 echo ""
 echo "================================================"
-echo "  WinPC Control - Ubuntu Setup"
+echo "  Remote PC Control - Ubuntu Setup"
 echo "================================================"
 echo "  Port:  $PORT"
 echo "  User:  $REAL_USER"
@@ -121,7 +121,7 @@ ok "Token saved to $CONFIG_FILE"
 # ---- Step 5: Configure passwordless shutdown via sudoers ----
 step "Configuring passwordless shutdown for $REAL_USER"
 cat > "$SUDOERS_FILE" <<EOF
-# Allow WinPC Control server to shut down without a password
+# Allow Remote PC Control server to shut down without a password
 $REAL_USER ALL=(ALL) NOPASSWD: /sbin/shutdown
 EOF
 chmod 440 "$SUDOERS_FILE"
@@ -137,7 +137,7 @@ fi
 # ---- Step 6: Add UFW firewall rule ----
 step "Adding UFW firewall rule (TCP port $PORT)"
 if command -v ufw >/dev/null 2>&1; then
-    ufw allow "$PORT/tcp" comment "WinPC Control HTTP" >/dev/null 2>&1 || true
+    ufw allow "$PORT/tcp" comment "Remote PC Control HTTP" >/dev/null 2>&1 || true
     ok "UFW rule added (TCP $PORT inbound)"
 else
     echo "     [WARN] ufw not found — manually open TCP port $PORT in your firewall"
@@ -152,7 +152,7 @@ chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.config"
 
 cat > "$SERVICE_DIR/$SERVICE_NAME.service" <<EOF
 [Unit]
-Description=WinPC Control Server for Q-SYS
+Description=Remote PC Control Server for Q-SYS
 After=network-online.target sound.target
 Wants=network-online.target
 
@@ -191,7 +191,7 @@ chown "$REAL_USER:$REAL_USER" "$LOG_FILE"
 
 echo ""
 echo "================================================"
-echo "  WinPC Control - Installation complete!"
+echo "  Remote PC Control - Installation complete!"
 echo "================================================"
 echo ""
 echo "  Copy this token into the Q-SYS plugin properties:"

@@ -347,7 +347,7 @@ elseif CurrentPage == "Setup" then
 
   table.insert(graphics, {
     Type       = "Text",
-    Text       = "Token is stored in C:\\QSYS WinPC Control\\config.txt on the Windows PC.",
+    Text       = "Token is stored in C:\\QSYS Remote PC Control\\config.txt on the Windows PC.",
     Position   = { 12, 175 },
     Size       = { 475, 14 },
     FontSize   = 9,

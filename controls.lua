@@ -1,5 +1,5 @@
 -- =============================================================
--- controls.lua -- Win PC Control
+-- controls.lua -- Remote PC Control
 --
 -- Defines all Q-SYS control objects for this plugin.
 -- Types, behaviors, and pin visibility.

@@ -1,6 +1,6 @@
 # ============================================================
 # install.ps1
-# One-time setup for WinPC Control on a Windows 11 PC.
+# One-time setup for Remote PC Control on a Windows 11 PC.
 # Run as Administrator. Run once per machine / per user account.
 #
 # Version: 0.2.0-alpha
@@ -13,11 +13,11 @@ param(
     [string]$Token = ""
 )
 
-$WORK_DIR      = "C:\QSYS WinPC Control"
-$SERVER_SCRIPT = "WinPCControlServer.ps1"
+$WORK_DIR      = "C:\QSYS Remote PC Control"
+$SERVER_SCRIPT = "RemotePCControlServer.ps1"
 $CONFIG_FILE   = "$WORK_DIR\config.txt"
 $LOG_FILE      = "$WORK_DIR\install.log"
-$TASK_NAME     = "WinPC Control Server"
+$TASK_NAME     = "Remote PC Control Server"
 
 function Write-Step ([string]$msg) {
     Write-Host ""
@@ -35,7 +35,7 @@ function Write-Fail ([string]$msg) {
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor White
-Write-Host "  WinPC Control - Windows Setup" -ForegroundColor White
+Write-Host "  Remote PC Control - Windows Setup" -ForegroundColor White
 Write-Host "================================================" -ForegroundColor White
 Write-Host "  Port:  $Port"
 Write-Host "  User:  $env:USERNAME"
@@ -129,13 +129,13 @@ try {
     Remove-NetFirewallRule -DisplayName "WinPC Control HTTP" -ErrorAction SilentlyContinue
 
     New-NetFirewallRule `
-        -DisplayName "WinPC Control HTTP" `
+        -DisplayName "Remote PC Control HTTP" `
         -Direction   Inbound `
         -Protocol    TCP `
         -LocalPort   $Port `
         -Action      Allow `
         -Profile     Any `
-        -Description "Allows Q-SYS plugin to reach WinPCControlServer on port $Port" | Out-Null
+        -Description "Allows Q-SYS plugin to reach RemotePCControlServer on port $Port" | Out-Null
 
     Write-OK "Firewall rule added (TCP $Port inbound, all profiles)"
 }
@@ -188,7 +188,7 @@ Add-Content -Path $LOG_FILE -Value $installRecord
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Green
-Write-Host "  WinPC Control - Installation complete!" -ForegroundColor Green
+Write-Host "  Remote PC Control - Installation complete!" -ForegroundColor Green
 Write-Host "================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Copy this token into the Q-SYS plugin properties:" -ForegroundColor Yellow

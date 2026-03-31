@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ================================================================
-# winpc-control-server.py
-# Persistent HTTP control server for Q-SYS WinPC Control plugin.
+# remotepc-control-server.py
+# Persistent HTTP control server for Q-SYS Remote PC Control plugin.
 #
 # Runs as a systemd user service in the interactive session
 # (required for PulseAudio/PipeWire audio access via pactl).
@@ -11,8 +11,8 @@
 #   POST /command   Accepts VOLUME:N  MUTE:0  MUTE:1  SHUTDOWN
 #   GET  /command?cmd=...  (Q-SYS emulate mode fallback)
 #
-# Config: /opt/qsys-winpc-control/config.txt  (PORT=, TOKEN=)
-# Log:    /opt/qsys-winpc-control/server.log
+# Config: /opt/qsys-remotepc-control/config.txt  (PORT=, TOKEN=)
+# Log:    /opt/qsys-remotepc-control/server.log
 #
 # Version: 0.1.0-alpha
 # ================================================================
@@ -32,7 +32,7 @@ from threading import Timer
 # CONFIGURATION
 # ============================================
 
-WORK_DIR    = "/opt/qsys-winpc-control"
+WORK_DIR    = "/opt/qsys-remotepc-control"
 CONFIG_FILE = os.path.join(WORK_DIR, "config.txt")
 LOG_FILE    = os.path.join(WORK_DIR, "server.log")
 LOG_MAX_LINES = 500
@@ -347,12 +347,12 @@ def main():
     trim_log()
 
     server = HTTPServer(("0.0.0.0", PORT), QSYSHandler)
-    write_log(f"=== WinPCControlServer (Linux) started on port {PORT} ===")
-    print(f"WinPC Control Server listening on port {PORT}")
+    write_log(f"=== RemotePCControlServer (Linux) started on port {PORT} ===")
+    print(f"Remote PC Control Server listening on port {PORT}")
 
     # Graceful shutdown on SIGTERM (systemd sends this on stop)
     def handle_signal(signum, frame):
-        write_log("=== WinPCControlServer stopped (signal) ===")
+        write_log("=== RemotePCControlServer stopped (signal) ===")
         server.shutdown()
 
     signal.signal(signal.SIGTERM, handle_signal)
@@ -364,7 +364,7 @@ def main():
         pass
     finally:
         server.server_close()
-        write_log("=== WinPCControlServer stopped ===")
+        write_log("=== RemotePCControlServer stopped ===")
 
 
 if __name__ == "__main__":

@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 # ================================================================
 # uninstall.sh
-# Removes all WinPC Control components from this Ubuntu PC.
+# Removes all Remote PC Control components from this Ubuntu PC.
 # Run with sudo:  sudo bash uninstall.sh
 #
 # Removes: systemd user service, UFW rule, sudoers drop-in,
-#          and /opt/qsys-winpc-control/
+#          and /opt/qsys-remotepc-control/
 #
 # Version: 0.1.0-alpha
 # ================================================================
 
 set -euo pipefail
 
-WORK_DIR="/opt/qsys-winpc-control"
+WORK_DIR="/opt/qsys-remotepc-control"
 CONFIG_FILE="$WORK_DIR/config.txt"
-SERVICE_NAME="winpc-control"
-SUDOERS_FILE="/etc/sudoers.d/winpc-control"
+SERVICE_NAME="remotepc-control"
+SUDOERS_FILE="/etc/sudoers.d/remotepc-control"
 
 # Must run as root
 if [[ $EUID -ne 0 ]]; then
@@ -42,7 +42,7 @@ fi
 
 echo ""
 echo "================================================"
-echo "  WinPC Control - Uninstall"
+echo "  Remote PC Control - Uninstall"
 echo "================================================"
 echo "  Port: $PORT"
 echo ""

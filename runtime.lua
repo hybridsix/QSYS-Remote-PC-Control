@@ -1,5 +1,5 @@
--- =============================================================
--- runtime.lua -- Win PC Control
+﻿-- =============================================================
+-- runtime.lua -- Remote PC Control
 -- Author: Michael King
 --
 -- This file contains all live runtime logic that executes inside
@@ -7,14 +7,14 @@
 -- design time -- only GetControlLayout(), GetProperties(), etc.
 -- in plugin.lua run at design time.
 --
--- Transport: HTTP via WinPCControlServer.ps1 on the Windows PC.
+-- Transport: HTTP via RemotePCControlServer.ps1 on the Windows PC.
 -- The server listens on a configurable port (default 2207) and
 -- accepts GET /status and POST /command requests, protected by
--- a Bearer token stored in C:\QSYS WinPC Control\config.txt on the PC.
+-- a Bearer token stored in C:\QSYS Remote PC Control\config.txt on the PC.
 --
 -- Power on uses Wake-on-LAN (UDP magic packet, ports 7 and 9).
 -- Volume and mute use the Windows Core Audio API via inline C#
--- inside WinPCControlServer.ps1.
+-- inside RemotePCControlServer.ps1.
 -- =============================================================
 
 
@@ -42,14 +42,14 @@ local authHeader = { Authorization = "Bearer " .. authToken }
 -- reset to its design-time value (often empty) on every push, but the cache
 -- file on /tmp stays intact. Keyed by hostname so multiple plugin instances
 -- don't collide.
-local MAC_CACHE_PATH = "/tmp/winpc_mac_" .. host:gsub("[^%w%-%.%_]", "_") .. ".cache"
+local MAC_CACHE_PATH = "/tmp/remotepc_mac_" .. host:gsub("[^%w%-%.%_]", "_") .. ".cache"
 
 local function SaveMacToCache(mac)
   local ok, err = pcall(function()
     local f = io.open(MAC_CACHE_PATH, "w")
     if f then f:write(mac); f:close() end
   end)
-  if not ok then print("[WinPC] MAC cache write failed: " .. tostring(err)) end
+  if not ok then print("[RemotePC] MAC cache write failed: " .. tostring(err)) end
 end
 
 local function LoadMacFromCache()
@@ -85,9 +85,9 @@ if macProperty ~= "" then
     cachedMac  = macProperty
     macIsManual = true
   else
-    print("[WinPC] WARNING: MAC Address property is invalid: '" .. macProperty .. "'")
-    print("[WinPC] Expected format: AA:BB:CC:DD:EE:FF or AA-BB-CC-DD-EE-FF")
-    print("[WinPC] Falling back to cached MAC address.")
+    print("[RemotePC] WARNING: MAC Address property is invalid: '" .. macProperty .. "'")
+    print("[RemotePC] Expected format: AA:BB:CC:DD:EE:FF or AA-BB-CC-DD-EE-FF")
+    print("[RemotePC] Falling back to cached MAC address.")
     cachedMac = LoadMacFromCache()
   end
 else
@@ -141,7 +141,7 @@ local function SetState(newState)
   if State == newState then return end
   State = newState
 
-  print("[WinPC] State -> " .. newState)
+  print("[RemotePC] State -> " .. newState)
 
   -- Update the Controls to reflect the new state.
   if newState == "ONLINE" then
@@ -186,7 +186,7 @@ end
 -- Debug helper -- always prints to the Q-SYS Core log (visible in the
 -- built-in Debug Output window below the plugin panel).
 local function dbg(dir, msg)
-  print("[WinPC][" .. dir .. "] " .. msg)
+  print("[RemotePC][" .. dir .. "] " .. msg)
 end
 
 
@@ -203,7 +203,7 @@ local function http_post(cmd, callback)
   -- Refuse to send if no token is configured. The server will reject it
   -- anyway, but this gives a clearer message in the log.
   if authToken == "" then
-    print("[WinPC] WARNING: Auth Token not set in plugin properties. Run install.ps1 on the PC first.")
+    print("[RemotePC] WARNING: Auth Token not set in plugin properties. Run install.ps1 on the PC first.")
     return
   end
 
@@ -273,9 +273,9 @@ local function SendWOL()
   -- populated automatically from the /status response. Until then,
   -- the user can set the MAC Address property manually.
   if not mac or mac == "" then
-    print("[WinPC] WOL: MAC address not known yet.")
-    print("[WinPC] WOL: Either set the MAC Address property manually,")
-    print("[WinPC] WOL: or bring the PC online once so it can be discovered.")
+    print("[RemotePC] WOL: MAC address not known yet.")
+    print("[RemotePC] WOL: Either set the MAC Address property manually,")
+    print("[RemotePC] WOL: or bring the PC online once so it can be discovered.")
     return
   end
 
@@ -287,7 +287,7 @@ local function SendWOL()
   end
 
   if #bytes ~= 6 then
-    print("[WinPC] WOL: MAC address is not valid (expected 6 bytes): " .. mac)
+    print("[RemotePC] WOL: MAC address is not valid (expected 6 bytes): " .. mac)
     return
   end
 
@@ -336,7 +336,7 @@ local function SendWOL()
   pollTimer:Stop()
   pollTimer:Start(pollInterval)
   if slowPolling then
-    print("[WinPC] Resuming fast poll at " .. pollInterval .. "s")
+    print("[RemotePC] Resuming fast poll at " .. pollInterval .. "s")
     slowPolling = false
   end
 end
@@ -354,7 +354,7 @@ local function SendShutdown()
     if code == 200 then
       SetState("SHUTTING_DOWN")
     else
-      print("[WinPC] Shutdown command failed. HTTP " .. tostring(code) .. " / " .. tostring(err))
+      print("[RemotePC] Shutdown command failed. HTTP " .. tostring(code) .. " / " .. tostring(err))
     end
   end)
 end
@@ -499,7 +499,7 @@ local function DoPoll()
           -- in case the property is cleared later.
           SaveMacToCache(status.MAC)
           if cachedMac ~= status.MAC then
-            dbg("Rx", "Server reported MAC " .. status.MAC .. " (ignored — manual MAC '" .. cachedMac .. "' takes priority)")
+            dbg("Rx", "Server reported MAC " .. status.MAC .. " (ignored â€” manual MAC '" .. cachedMac .. "' takes priority)")
           end
         elseif cachedMac ~= status.MAC then
           cachedMac = status.MAC
@@ -545,7 +545,7 @@ local function DoPoll()
         SetState("OFFLINE")
       end
 
-      print("[WinPC] Poll failed: " .. tostring(err or code))
+      print("[RemotePC] Poll failed: " .. tostring(err or code))
     end
 
     -- Safety net: if BOOTING has persisted for more than 120 seconds,
@@ -554,7 +554,7 @@ local function DoPoll()
     if State == "BOOTING" and bootingSince then
       local elapsed = os.time() - bootingSince
       if elapsed > 120 then
-        print("[WinPC] Boot timeout (" .. elapsed .. "s) -- forcing OFFLINE")
+        print("[RemotePC] Boot timeout (" .. elapsed .. "s) -- forcing OFFLINE")
         SetState("OFFLINE")
       end
     end
@@ -565,14 +565,14 @@ local function DoPoll()
     if State == "SHUTTING_DOWN" and shuttingDownSince then
       local elapsed = os.time() - shuttingDownSince
       if elapsed > 120 then
-        print("[WinPC] Shutdown timeout (" .. elapsed .. "s) -- forcing OFFLINE")
+        print("[RemotePC] Shutdown timeout (" .. elapsed .. "s) -- forcing OFFLINE")
         SetState("OFFLINE")
       end
     end
     end) -- end pcall
 
     if not ok then
-      print("[WinPC] ERROR in poll callback: " .. tostring(luaErr))
+      print("[RemotePC] ERROR in poll callback: " .. tostring(luaErr))
     end
   end)
 end
@@ -585,7 +585,7 @@ pollTimer.EventHandler = function()
   pollTimer:Stop()
   local ok, luaErr = pcall(DoPoll)
   if not ok then
-    print("[WinPC] ERROR in DoPoll: " .. tostring(luaErr))
+    print("[RemotePC] ERROR in DoPoll: " .. tostring(luaErr))
   end
 
   -- Adaptive polling: use the slow interval if the PC has been offline
@@ -596,7 +596,7 @@ pollTimer.EventHandler = function()
     if elapsed >= OFFLINE_COOLDOWN then
       interval = OFFLINE_POLL_INTERVAL
       if not slowPolling then
-        print("[WinPC] Offline >" .. OFFLINE_COOLDOWN .. "s, slowing poll to " .. OFFLINE_POLL_INTERVAL .. "s")
+        print("[RemotePC] Offline >" .. OFFLINE_COOLDOWN .. "s, slowing poll to " .. OFFLINE_POLL_INTERVAL .. "s")
         slowPolling = true
       end
     end
@@ -611,7 +611,7 @@ end
 
 local function RequireOnline(label)
   if State ~= "ONLINE" then
-    print("[WinPC] Command ignored (" .. label .. ") -- PC is currently: " .. State)
+    print("[RemotePC] Command ignored (" .. label .. ") -- PC is currently: " .. State)
     return false
   end
   return true
@@ -677,7 +677,7 @@ end
 -- -------------------------------------------------------------
 
 -- -------------------------------------------------------------
--- Setup page controls — initialize from Properties, apply on Update.
+-- Setup page controls â€” initialize from Properties, apply on Update.
 -- -------------------------------------------------------------
 
 local function InitSetupControls()
@@ -710,7 +710,7 @@ local function ApplyConfig()
   syncedFromPc = false
   SetState("OFFLINE")
   pollTimer:Start(pollInterval)
-  print("[WinPC] Config updated. Polling " .. (host ~= "" and host or "(no hostname set)") .. " every " .. pollInterval .. "s.")
+  print("[RemotePC] Config updated. Polling " .. (host ~= "" and host or "(no hostname set)") .. " every " .. pollInterval .. "s.")
 end
 
 Controls.CfgUpdate.EventHandler = function()
@@ -724,14 +724,14 @@ Controls.VolumeMax.Value       = 100
 Controls.VolumeWarning.Boolean = false
 InitSetupControls()
 pollTimer:Start(pollInterval)
-print("[WinPC] Plugin started. Polling " .. (host ~= "" and host or "(no hostname set)") .. " every " .. pollInterval .. "s.")
+print("[RemotePC] Plugin started. Polling " .. (host ~= "" and host or "(no hostname set)") .. " every " .. pollInterval .. "s.")
 if cachedMac and cachedMac ~= "" then
   if macIsManual then
-    print("[WinPC] MAC address from property (manual): " .. cachedMac)
+    print("[RemotePC] MAC address from property (manual): " .. cachedMac)
   else
-    print("[WinPC] MAC address from cache file: " .. cachedMac)
+    print("[RemotePC] MAC address from cache file: " .. cachedMac)
   end
 else
-  print("[WinPC] No MAC address available — will auto-discover when PC comes online.")
+  print("[RemotePC] No MAC address available â€” will auto-discover when PC comes online.")
 end
 

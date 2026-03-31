@@ -1,6 +1,6 @@
 # ================================================================
-# WinPCControlServer.ps1
-# Persistent HTTP control server for Q-SYS WinPC Control plugin.
+# RemotePCControlServer.ps1
+# Persistent HTTP control server for Q-SYS Remote PC Control plugin.
 #
 # Runs in the interactive user session (required for audio API).
 # Started at logon by a Scheduled Task installed by install.ps1.
@@ -9,8 +9,8 @@
 #   GET  /status    Returns current volume, mute state, timestamp
 #   POST /command   Accepts VOLUME:N  MUTE:0  MUTE:1  SHUTDOWN
 #
-# Config: C:\QSYS WinPC Control\config.txt  (PORT=, TOKEN=)
-# Log:    C:\QSYS WinPC Control\server.log
+# Config: C:\QSYS Remote PC Control\config.txt  (PORT=, TOKEN=)
+# Log:    C:\QSYS Remote PC Control\server.log
 #
 # Version: 0.2.0-alpha
 # ================================================================
@@ -20,7 +20,7 @@
 # CONFIGURATION
 # ============================================
 
-$WORK_DIR   = "C:\QSYS WinPC Control"
+$WORK_DIR   = "C:\QSYS Remote PC Control"
 $CONFIG_FILE = "$WORK_DIR\config.txt"
 $LOG_FILE    = "$WORK_DIR\server.log"
 
@@ -50,7 +50,7 @@ if ($Token -eq "") {
 # CONSOLE WINDOW SETUP
 # ============================================
 
-$Host.UI.RawUI.WindowTitle = "WinPC Control Server - DO NOT CLOSE"
+$Host.UI.RawUI.WindowTitle = "Remote PC Control Server - DO NOT CLOSE"
 
 $script:lastQsysContact = $null
 $script:statusLines = [System.Collections.Generic.List[string]]::new()
@@ -61,7 +61,7 @@ function Show-Banner {
     Clear-Host
     Write-Host ""
     Write-Host "  ============================================" -ForegroundColor Cyan
-    Write-Host "    WinPC Control Server" -ForegroundColor White
+    Write-Host "    Remote PC Control Server" -ForegroundColor White
     Write-Host "    DO NOT CLOSE THIS WINDOW" -ForegroundColor Yellow
     Write-Host "  ============================================" -ForegroundColor Cyan
     Write-Host ""
@@ -104,9 +104,9 @@ function Update-ConsoleStatus {
         } else {
             $ago = "{0}m ago" -f [int]$elapsed.TotalMinutes
         }
-        $Host.UI.RawUI.WindowTitle = "WinPC Control - Connected (last poll $ago)"
+        $Host.UI.RawUI.WindowTitle = "Remote PC Control - Connected (last poll $ago)"
     } else {
-        $Host.UI.RawUI.WindowTitle = "WinPC Control - Waiting for Q-SYS..."
+        $Host.UI.RawUI.WindowTitle = "Remote PC Control - Waiting for Q-SYS..."
     }
 
     # Overwrite status area in place — no Clear-Host, no flicker
@@ -434,7 +434,7 @@ $listener.Prefixes.Add("http://+:$Port/")
 
 try {
     $listener.Start()
-    Write-Log "=== WinPCControlServer started on port $Port ==="
+    Write-Log "=== RemotePCControlServer started on port $Port ==="
     Trim-Log   # Trim any leftover growth from previous run
     Show-Banner
     Write-Host "  Waiting for Q-SYS connection..." -ForegroundColor Yellow
@@ -506,4 +506,4 @@ while ($listener.IsListening) {
     }
 }
 
-Write-Log "=== WinPCControlServer stopped ==="
+Write-Log "=== RemotePCControlServer stopped ==="

@@ -1,15 +1,15 @@
-# Win PC Control - Operator's Guide
+# Remote PC Control - Operator's Guide
 
-**Plugin:** Hybridsix Software -> Win PC Control
+**Plugin:** Hybridsix Software -> Remote PC Control
 **Version:** 0.2.0-alpha
 
-This guide is for AV technicians and system operators who are using an installed and configured Win PC Control plugin in a Q-SYS design. For installation and setup, refer to the [README](../README.md).
+This guide is for AV technicians and system operators who are using an installed and configured Remote PC Control plugin in a Q-SYS design. For installation and setup, refer to the [README](../README.md).
 
 ---
 
 ## What this plugin does
 
-Win PC Control lets a Q-SYS Core manage a Windows PC on the same network. From the plugin panel or from wired controls in your design, you can:
+Remote PC Control lets a Q-SYS Core manage a Windows PC on the same network. From the plugin panel or from wired controls in your design, you can:
 
 - **Turn the PC on** (Wake-on-LAN - works even when the PC is off)
 - **Shut the PC down** gracefully
@@ -129,12 +129,12 @@ The PC is reporting a volume level outside the Vol Min / Vol Max range you've co
 
 The plugin has a 120-second safety timeout — if the PC doesn't come online within 2 minutes of a WOL, the status automatically returns to **Offline**. If this keeps happening, check:
 - The user account is logged in (the server requires an active user session)
-- Task Scheduler -> `WinPC Control Server` task exists and is enabled
-- No error in `C:\QSYS WinPC Control\server.log` on the PC
+- Task Scheduler -> `Remote PC Control Server` task exists and is enabled
+- No error in `C:\QSYS Remote PC Control\server.log` on the PC
 
 ### The plugin shows Online but volume/mute don't respond
 
-Check that the Auth Token in the plugin Properties matches the token in `C:\QSYS WinPC Control\config.txt` on the PC. A mismatch causes commands to be rejected with a 401 error - the plugin may still show Online from a cached state.
+Check that the Auth Token in the plugin Properties matches the token in `C:\QSYS Remote PC Control\config.txt` on the PC. A mismatch causes commands to be rejected with a 401 error - the plugin may still show Online from a cached state.
 
 ---
 
@@ -156,10 +156,10 @@ If your design is wired to control this plugin from UCI buttons, a touch panel, 
 
 ## Maintenance
 
-**Server log:** `C:\QSYS WinPC Control\server.log` on the Windows PC. Capped at 500 lines, oldest entries are dropped automatically.
+**Server log:** `C:\QSYS Remote PC Control\server.log` on the Windows PC. Capped at 500 lines, oldest entries are dropped automatically.
 
-**Restarting the server manually:** Open Task Scheduler on the PC, find `WinPC Control Server`, and click **Run**. Or simply log out and back in.
+**Restarting the server manually:** Open Task Scheduler on the PC, find `Remote PC Control Server`, and click **Run**. Or simply log out and back in.
 
 **Updating the plugin:** Replace the `.qplug` file in the Q-SYS Designer plugins folder and reload the design. Existing property values (IP, token, etc.) are preserved as long as the plugin GUID hasn't changed.
 
-**Updating the server script:** Copy the new `WinPCControlServer.ps1` from `windows-agent/` to `C:\QSYS WinPC Control\` on the PC and restart the task. The auth token and port are preserved in `config.txt` - no need to re-run `install.ps1` for script-only updates.
+**Updating the server script:** Copy the new `RemotePCControlServer.ps1` from `windows-agent/` to `C:\QSYS Remote PC Control\` on the PC and restart the task. The auth token and port are preserved in `config.txt` - no need to re-run `install.ps1` for script-only updates.

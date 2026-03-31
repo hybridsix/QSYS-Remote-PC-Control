@@ -1,5 +1,5 @@
 -- =============================================================
--- info.lua -- Win PC Control
+-- info.lua -- Remote PC Control
 --
 -- Plugin identity block. Read by PLUGCC at compile time and
 -- embedded in the .qplug file. Q-SYS Designer reads this when
@@ -15,7 +15,7 @@
 -- =============================================================
 
 PluginInfo = {
-  Name        = "Hybridsix Software~Win PC Control",
+  Name        = "Hybridsix Software~Remote PC Control",
   Version     = "0.7.2-beta",
   BuildVersion= "0.7.3.31b",
   Id          = "dd941513-d452-416e-95eb-b47d08457b36",
