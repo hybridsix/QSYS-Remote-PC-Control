@@ -1,6 +1,6 @@
 # Win PC Control - Operator's Guide
 
-**Plugin:** Hybridsix Plugins -> Win PC Control
+**Plugin:** Hybridsix Software -> Win PC Control
 **Version:** 0.2.0-alpha
 
 This guide is for AV technicians and system operators who are using an installed and configured Win PC Control plugin in a Q-SYS design. For installation and setup, refer to the [README](../README.md).

@@ -83,7 +83,7 @@ To remove everything cleanly, run `uninstall.ps1` as Administrator.
 1. Copy `QSYS WinPC Control.qplug` to:
    `%USERPROFILE%\Documents\QSC\Q-Sys Designer\Plugins\QSYS WinPC Control\`
 2. Restart Q-SYS Designer (or use **Manage Plugins** to reload)
-3. Drag **Hybridsix Plugins -> Win PC Control** from the component library onto your schematic
+3. Drag **Hybridsix Software -> Win PC Control** from the component library onto your schematic
 4. Open the plugin's **Properties** panel and fill in:
 
 | Property | Value |
