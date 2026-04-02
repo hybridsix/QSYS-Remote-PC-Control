@@ -79,15 +79,15 @@ function Show-Banner {
 }
 
 function Update-ConsoleStatus {
-    param([string]$Event = "poll")
+    param([string]$EventType = "poll")
 
     $ts = Get-Date -Format "HH:mm:ss"
 
-    if ($Event -eq "poll") {
+    if ($EventType -eq "poll") {
         $script:lastQsysContact = Get-Date
         $script:statusLines.Add("  [$ts]  Q-SYS poll received")
     }
-    elseif ($Event -eq "command") {
+    elseif ($EventType -eq "command") {
         $script:statusLines.Add("  [$ts]  Q-SYS command received")
     }
 
@@ -139,10 +139,10 @@ function Write-Log {
     $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     Add-Content -Path $LOG_FILE -Value "[$ts] $Message"
     $script:_logWriteCount++
-    if ($script:_logWriteCount % 100 -eq 0) { Trim-Log }
+    if ($script:_logWriteCount % 100 -eq 0) { Limit-Log }
 }
 
-function Trim-Log {
+function Limit-Log {
     if (-not (Test-Path $LOG_FILE)) { return }
     $lines = Get-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
     if ($lines.Count -gt $LOG_MAX_LINES) {
@@ -435,7 +435,7 @@ $listener.Prefixes.Add("http://+:$Port/")
 try {
     $listener.Start()
     Write-Log "=== RemotePCControlServer started on port $Port ==="
-    Trim-Log   # Trim any leftover growth from previous run
+    Limit-Log   # Trim any leftover growth from previous run
     Show-Banner
     Write-Host "  Waiting for Q-SYS connection..." -ForegroundColor Yellow
 }
@@ -469,7 +469,7 @@ while ($listener.IsListening) {
         if ($path -eq "/status" -and $method -eq "GET") {
             $body = Get-StatusBody
             Send-Response -Response $response -Body $body
-            Update-ConsoleStatus -Event "poll"
+            Update-ConsoleStatus -EventType "poll"
         }
         elseif ($path -eq "/command" -and ($method -eq "POST" -or $method -eq "GET")) {
             $reader  = [System.IO.StreamReader]::new($request.InputStream, [System.Text.Encoding]::UTF8)
@@ -487,7 +487,7 @@ while ($listener.IsListening) {
                 # Send OK before SHUTDOWN so Q-SYS gets the response
                 Send-Response -Response $response -Body "OK"
                 Invoke-QSYSCommand -RawMessage $cmdBody
-                Update-ConsoleStatus -Event "command"
+                Update-ConsoleStatus -EventType "command"
             } else {
                 Send-Response -Response $response -StatusCode 400 -Body "Empty command"
             }
