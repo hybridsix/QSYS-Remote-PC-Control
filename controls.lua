@@ -1,21 +1,19 @@
 -- =============================================================
 -- controls.lua -- Remote PC Control
 --
--- Defines all Q-SYS control objects for this plugin.
--- Types, behaviors, and pin visibility.
--- Visual layout lives in layout.lua.
+-- All Q-SYS control objects for this plugin. Types, behaviors,
+-- and pin visibility are defined here; visual layout is in
+-- layout.lua.
 -- =============================================================
 
 
--- Pin visibility is controlled by UserPin=true checkboxes in the Properties panel.
--- PinStyle sets the default state: a real style = checked (visible); "None" = unchecked (hidden).
+-- UserPin=true puts the control in the Properties panel
+-- Control Pins checklist. PinStyle sets the default:
+-- a real direction ("Input"/"Output"/"Both") = checked/visible,
+-- "None" = available but unchecked.
 
 
--- -------------------------------------------------------------
--- Power controls
--- PowerOn sends a Wake-on-LAN magic packet.
--- Shutdown sends an HTTP POST to the Windows server.
--- -------------------------------------------------------------
+-- Power buttons (WOL + shutdown)
 table.insert(ctrls, {
   Name        = "PowerOn",
   ControlType = "Button",
@@ -37,9 +35,7 @@ table.insert(ctrls, {
 })
 
 
--- -------------------------------------------------------------
--- Status indicators -- all output-only, reflect PC state.
--- -------------------------------------------------------------
+-- Status indicators (output-only, reflect PC state)
 table.insert(ctrls, {
   Name          = "OnlineStatus",
   ControlType   = "Indicator",
@@ -68,9 +64,7 @@ table.insert(ctrls, {
 })
 
 
--- -------------------------------------------------------------
--- Audio controls -- bidirectional, poll timer keeps them in sync.
--- -------------------------------------------------------------
+-- Audio controls -- kept in sync with the PC via the poll timer
 table.insert(ctrls, {
   Name        = "Volume",
   ControlType = "Knob",
@@ -123,10 +117,7 @@ table.insert(ctrls, {
 })
 
 
--- -------------------------------------------------------------
--- Volume entry -- editable text box for typing an exact volume.
--- Syncs bidirectionally with the Volume fader.
--- -------------------------------------------------------------
+-- Digit box so the user can type an exact volume %
 table.insert(ctrls, {
   Name        = "VolumeEntry",
   ControlType = "Knob",
@@ -139,10 +130,7 @@ table.insert(ctrls, {
 })
 
 
--- -------------------------------------------------------------
--- Discovered hostname -- auto-populated from HOSTNAME: field in
--- each successful /status response. Shown on the Control page.
--- -------------------------------------------------------------
+-- Hostname reported by the PC in /status responses
 table.insert(ctrls, {
   Name          = "DiscoveredName",
   ControlType   = "Indicator",
@@ -153,11 +141,9 @@ table.insert(ctrls, {
 })
 
 
--- -------------------------------------------------------------
--- Setup page editable fields - mirror Properties for runtime editing.
--- These are text/integer entry controls placed on the Setup tab.
--- The Update button writes their values back to Properties.
--- -------------------------------------------------------------
+-- Setup page fields -- these mirror Properties so the integrator
+-- can tweak config at runtime without reopening the Properties panel.
+-- CfgUpdate writes them all back when pressed.
 table.insert(ctrls, {
   Name          = "CfgComputerName",
   ControlType   = "Indicator",

@@ -17,7 +17,7 @@
 PluginInfo = {
   Name        = "Hybridsix Software~Remote PC Control",
   Version     = "0.7.2-beta",
-  BuildVersion= "0.7.3.31b",
+  BuildVersion= "0.7.4.02",
   Id          = "dd941513-d452-416e-95eb-b47d08457b36",
   Author      = "Michael King",
   Description = "Remote control a Windows or Ubuntu based PC from Q-SYS: Wake-on-LAN power on, volume and mute via HTTP, and live status polling."

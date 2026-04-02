@@ -95,7 +95,7 @@ end
 -- -------------------------------------------------------------
 -- GetProperties()
 -- Returns all user-configurable property definitions.
--- These appear in the plugin's Properties panel in Designer.
+-- These appear in the plugin Properties panel in Designer.
 -- -------------------------------------------------------------
 function GetProperties()
   local props = {}
