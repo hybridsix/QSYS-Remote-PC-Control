@@ -135,6 +135,24 @@ if CurrentPage == "Control" then
     FontSize   = 11
   }
 
+  table.insert(graphics, {
+    Type       = "Text",
+    Text       = "State:",
+    Position   = { labelX, statusY + 100 },
+    Size       = { labelW, 20 },
+    FontSize   = 11,
+    HTextAlign = "Right",
+    Color      = { 60, 60, 60 }
+  })
+
+  layout["PowerState"] = {
+    PrettyName = "Status~Power State",
+    Style      = "Text",
+    Position   = { textX, statusY + 100 },
+    Size       = { textW, 20 },
+    FontSize   = 11
+  }
+
   -- ---- Audio box: y=audioY, h=110 ----
   table.insert(graphics, {
     Type         = "GroupBox",
