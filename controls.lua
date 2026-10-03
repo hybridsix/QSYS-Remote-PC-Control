@@ -54,6 +54,16 @@ table.insert(ctrls, {
   PinStyle      = "Output"
 })
 
+-- Machine-readable state for control logic: OFFLINE / BOOTING / ONLINE / SHUTTING_DOWN
+table.insert(ctrls, {
+  Name          = "PowerState",
+  ControlType   = "Indicator",
+  IndicatorType = "Text",
+  Count         = 1,
+  UserPin       = true,
+  PinStyle      = "Output"
+})
+
 table.insert(ctrls, {
   Name          = "LastPoll",
   ControlType   = "Indicator",

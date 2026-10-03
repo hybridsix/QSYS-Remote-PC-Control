@@ -258,6 +258,16 @@ elseif CurrentPage == "Setup" then
     Size         = { 490, 210 }
   })
 
+  table.insert(graphics, {
+    Type       = "Text",
+    Text       = "v" .. PluginInfo.Version,
+    Position   = { 395, 9 },
+    Size       = { 95, 14 },
+    FontSize   = 9,
+    HTextAlign = "Right",
+    Color      = { 105, 104, 104 }
+  })
+
   local function cfg_label(text, y)
     table.insert(graphics, {
       Type       = "Text",

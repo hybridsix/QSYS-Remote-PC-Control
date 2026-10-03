@@ -1,7 +1,7 @@
 # Remote PC Control - Operator's Guide
 
 **Plugin:** Hybridsix Software -> Remote PC Control
-**Version:** 0.2.0-alpha
+**Version:** 0.7.5
 
 This guide is for AV technicians and system operators who are using an installed and configured Remote PC Control plugin in a Q-SYS design. For installation and setup, refer to the [README](../README.md).
 
@@ -148,6 +148,7 @@ If your design is wired to control this plugin from UCI buttons, a touch panel, 
 | Shutdown | Input | Momentary trigger (Boolean pulse) |
 | Status Online | Output | Boolean - `true` = Online |
 | Status Text | Output | String - current state label |
+| Power State | Output | String - `OFFLINE`, `BOOTING`, `ONLINE`, or `SHUTTING_DOWN` (for control logic) |
 | Last Poll | Output | String - timestamp |
 | Volume | Both | Float 0-100 |
 | Mute | Both | Boolean - `true` = muted |

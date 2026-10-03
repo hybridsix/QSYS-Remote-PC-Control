@@ -1,7 +1,7 @@
 # Remote PC Control - Q-SYS Plugin
 
 **Author:** Michael King / Hybridsix
-**Version:** 0.2.0-alpha
+**Version:** 0.7.5
 **Platform:** Q-SYS Designer 9.x+, Windows 10/11 target PC
 
 A Q-SYS plugin that gives your Core direct control over a Windows PC on the local network - power, volume, mute, and live status, all from the schematic.
@@ -107,6 +107,7 @@ All pins are available in the **Control Pins** section of the Properties panel a
 | Shutdown | Input | Button | Sends a graceful shutdown command |
 | Status Online | Output | LED | `true` when the server is reachable |
 | Status Text | Output | Text | Current state: Offline / Booting... / Online / Shutting Down... |
+| Power State | Output | Text | Machine-readable state for control logic: `OFFLINE` / `BOOTING` / `ONLINE` / `SHUTTING_DOWN` |
 | Last Poll | Output | Text | Timestamp of the last successful poll |
 | Volume | Both | Fader (0-100) | Windows master volume (also has a digit entry box on the panel) |
 | Mute | Both | Toggle button | Windows master mute |

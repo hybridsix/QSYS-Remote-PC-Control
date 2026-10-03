@@ -42,8 +42,8 @@
 
 PluginInfo = {
   Name        = "Hybridsix Software~Remote PC Control",
-  Version     = "0.7.2-beta",
-  BuildVersion= "0.7.4.02",
+  Version     = "0.7.5",
+  BuildVersion= "0.7.5.0",
   Id          = "dd941513-d452-416e-95eb-b47d08457b36",
   Author      = "Michael King",
   Description = "Remote control a Windows or Ubuntu based PC from Q-SYS: Wake-on-LAN power on, volume and mute via HTTP, and live status polling."
@@ -364,6 +364,16 @@ function GetControls(props)
   
   table.insert(ctrls, {
     Name          = "StatusText",
+    ControlType   = "Indicator",
+    IndicatorType = "Text",
+    Count         = 1,
+    UserPin       = true,
+    PinStyle      = "Output"
+  })
+  
+  -- Machine-readable state for control logic: OFFLINE / BOOTING / ONLINE / SHUTTING_DOWN
+  table.insert(ctrls, {
+    Name          = "PowerState",
     ControlType   = "Indicator",
     IndicatorType = "Text",
     Count         = 1,
@@ -801,6 +811,16 @@ function GetControlLayout(props)
       Size         = { 490, 210 }
     })
   
+    table.insert(graphics, {
+      Type       = "Text",
+      Text       = "v" .. PluginInfo.Version,
+      Position   = { 395, 9 },
+      Size       = { 95, 14 },
+      FontSize   = 9,
+      HTextAlign = "Right",
+      Color      = { 105, 104, 104 }
+    })
+  
     local function cfg_label(text, y)
       table.insert(graphics, {
         Type       = "Text",
@@ -1042,6 +1062,8 @@ if Controls then
     -- Skip if already in this state to avoid redundant control updates.
     if State == newState then return end
     State = newState
+  
+    Controls.PowerState.String = newState
   
     print("[RemotePC] State -> " .. newState)
   

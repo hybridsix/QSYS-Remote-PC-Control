@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================
 # install.sh
-# One-time setup for Remote PC Control on Ubuntu 24.04 LTS.
+# One-time setup for Remote PC Control on Ubuntu 26.04 LTS.
 # Run with sudo:  sudo bash install.sh
 #
 # Creates:
@@ -11,7 +11,7 @@
 #   /etc/sudoers.d/remotepc-control       Passwordless shutdown
 #   UFW rule for the configured port
 #
-# Version: 0.1.0-alpha
+# Version: 0.7.5
 # ============================================================
 
 set -euo pipefail
@@ -66,7 +66,7 @@ echo ""
 
 # ---- Step 1: Install dependencies ----
 step "Checking dependencies"
-# python3 is usually already present on Ubuntu 24.04 but we check anyway.
+# python3 is usually already present on Ubuntu 26.04 but we check anyway.
 # pulseaudio-utils gives us the pactl command for volume/mute control.
 DEPS_NEEDED=""
 command -v python3 >/dev/null 2>&1 || DEPS_NEEDED="$DEPS_NEEDED python3"

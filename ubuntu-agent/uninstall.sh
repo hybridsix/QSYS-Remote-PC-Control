@@ -7,7 +7,7 @@
 # Removes: systemd user service, UFW rule, sudoers drop-in,
 #          and /opt/qsys-remotepc-control/
 #
-# Version: 0.1.0-alpha
+# Version: 0.7.5
 # ================================================================
 
 set -euo pipefail

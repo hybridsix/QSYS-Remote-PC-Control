@@ -14,7 +14,7 @@
 # Config: /opt/qsys-remotepc-control/config.txt  (PORT=, TOKEN=)
 # Log:    /opt/qsys-remotepc-control/server.log
 #
-# Version: 0.1.0-alpha
+# Version: 0.7.5
 # ================================================================
 
 import os
@@ -103,7 +103,7 @@ def trim_log():
 # AUDIO CONTROL  (pactl - PulseAudio / PipeWire)
 # ============================================
 # All volume/mute control goes through pactl, which talks to whatever audio
-# server the desktop session is running (PipeWire on Ubuntu 24.04, or classic
+# server the desktop session is running (PipeWire on Ubuntu 26.04, or classic
 # PulseAudio on older installs). The pactl CLI comes from pulseaudio-utils.
 #
 # Important: pactl needs to connect to the user's audio daemon, which is why

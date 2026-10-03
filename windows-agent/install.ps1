@@ -3,7 +3,7 @@
 # One-time setup for Remote PC Control on a Windows 11 PC.
 # Run as Administrator. Run once per machine / per user account.
 #
-# Version: 0.2.0-alpha
+# Version: 0.7.5
 # ============================================================
 
 #Requires -RunAsAdministrator

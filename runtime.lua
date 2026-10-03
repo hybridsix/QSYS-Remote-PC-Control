@@ -121,6 +121,8 @@ local function SetState(newState)
   if State == newState then return end
   State = newState
 
+  Controls.PowerState.String = newState
+
   print("[RemotePC] State -> " .. newState)
 
   -- Update the Controls to reflect the new state.

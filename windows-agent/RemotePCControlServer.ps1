@@ -12,7 +12,7 @@
 # Config: C:\QSYS Remote PC Control\config.txt  (PORT=, TOKEN=)
 # Log:    C:\QSYS Remote PC Control\server.log
 #
-# Version: 0.2.0-alpha
+# Version: 0.7.5
 # ================================================================
 
 

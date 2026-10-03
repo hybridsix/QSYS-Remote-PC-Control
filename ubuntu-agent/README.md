@@ -1,10 +1,10 @@
 # Remote PC Control - Ubuntu Agent
 
-HTTP control server that lets a Q-SYS Core remotely control volume, mute, and power on an Ubuntu 24.04 LTS PC.
+HTTP control server that lets a Q-SYS Core remotely control volume, mute, and power on an Ubuntu 26.04 LTS PC.
 
 ## Requirements
 
-- Ubuntu 24.04 LTS (PipeWire + PulseAudio compatibility layer)
+- Ubuntu 26.04 LTS (PipeWire + PulseAudio compatibility layer)
 - Python 3 (pre-installed)
 - `pactl` (from `pulseaudio-utils`, installed automatically)
 - A user session with audio access (the service runs as your user, not root)
